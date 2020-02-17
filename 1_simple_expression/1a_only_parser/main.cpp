@@ -24,7 +24,7 @@ int main(int argc, const char* argv[]) {
   }
 
   // open input file (or std::cin) and create a character stream
-  antlr4::ANTLRInputStream input;
+  antlr4::ANTLRInputStream input;   //IMPORTANT
   if (argc == 2) {  // reads from <file>
     std::ifstream stream;
     stream.open(argv[1]);
@@ -35,11 +35,11 @@ int main(int argc, const char* argv[]) {
   }
 
   // create a lexer that consumes the character stream and produces a token stream
-  ExprLexer lexer(&input);
+  ExprLexer lexer(&input);  //IMPORTANT
   antlr4::CommonTokenStream tokens(&lexer);
 
   // create a parser that consumes the token stream, and parses it
-  ExprParser parser(&tokens);
+  ExprParser parser(&tokens);   //IMPORTANT agafa tokens i construeix arbre derivacio
 
   // call the parser and get the parse tree. s is the initial symbol
   antlr4::tree::ParseTree *tree = parser.s();
@@ -52,7 +52,7 @@ int main(int argc, const char* argv[]) {
   }
   
   // print the parse tree (for debugging purposes)
-  std::cout << tree->toStringTree(&parser) << std::endl;
+  std::cout << tree->toStringTree(&parser) << std::endl;    //IMPORTANT imprimeix arbre´
 
   return EXIT_SUCCESS;
 }

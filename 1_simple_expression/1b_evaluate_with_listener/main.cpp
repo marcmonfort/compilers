@@ -11,6 +11,8 @@
 #include <cstdio>     // fopen
 #include <cstdlib>    // EXIT_FAILURE, EXIT_SUCCESS
 
+#include <algorithm> //NUEVO
+
 // using namespace std;
 // using namespace antlr4;
 
@@ -19,7 +21,7 @@
 // Sample "evaluator" (implemented with a listener and tree properties)
 class Evaluator : public ExprBaseListener {
 public:
-  antlr4::tree::ParseTreeProperty<int> values;  // to store values computed at each node
+  antlr4::tree::ParseTreeProperty<int> values;  // to store values computed at each node    //IMPORTANT
 
   void exitS(ExprParser::SContext *ctx) {  // s : e EOF ;
     values.put(ctx, values.get(ctx->e()));
@@ -35,10 +37,28 @@ public:
     else {
       int left = values.get(ctx->e(0));
       int right = values.get(ctx->e(1));
-      if (ctx->MUL())  // if this node has a child MUL
+      if (ctx->MUL())  // if this node has a child MUL      //IMPORTANT aqui operamos con los valores
         values.put(ctx, left*right);
-      else             // must be ADD
+      else if (ctx->ADD())             // must be ADD
         values.put(ctx, left+right);
+      
+      else if (ctx->DIV())             // must be ADD
+        values.put(ctx, left/right);
+      
+      else if (ctx->SUB()) {            // must be ADD
+        if (ctx->e(1)) values.put(ctx, left-right);     //mira si existe el segundo hijo
+        else values.put(ctx, -left);
+      }
+      
+      else if (ctx->MAX())             // must be ADD
+        values.put(ctx, std::max(left,right));
+      
+      else if (ctx->MIN())            // must be ADD
+        values.put(ctx, std::min(left,right));
+      
+      else if (ctx->LPAR() )            // must be ADD
+        values.put(ctx, left);
+
     }
   }
 
