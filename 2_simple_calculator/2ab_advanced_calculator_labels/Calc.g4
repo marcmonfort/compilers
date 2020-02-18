@@ -4,7 +4,8 @@ prog:  stat+ EOF ;
 
 stat:  expr NEWLINE                                 # printExpr
     |  ID '=' expr NEWLINE                          # assign
-    |  IF expr THEN stat+ else1 ENDIF                # if
+    |  IF expr THEN stat+ else1 ENDIF               # if
+    |  WHILE expr 'do' stat+  ENDWHILE              # while
     |  NEWLINE                                      # blank
     ;
     
@@ -41,10 +42,13 @@ GT  :  '>' ;
 LPAR : '(' ;
 RPAR : ')' ;
 
-IF  : 'if' ;
-THEN:'then';
-ELSE:'else';
-ENDIF:'endif';
+IF    : 'if'    ;
+THEN  : 'then'  ;
+ELSE  : 'else'  ;
+ENDIF : 'endif' ;
+
+WHILE     : 'while'     ;
+ENDWHILE  : 'endwhile'  ;
 
 
 

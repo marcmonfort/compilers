@@ -40,7 +40,7 @@ public:
     return 0;                               // return dummy value
   }
 
-  // stat : IF expr THEN stat
+  // stat : IF expr THEN stat+ ENDIF
   antlrcpp::Any visitIf(CalcParser::IfContext *ctx) {
     int left = visit(ctx->expr());         // get value of left subexpression
     if (left) {     // get value of right subexpression;
@@ -48,11 +48,22 @@ public:
             visit(ctx->stat(i));
     }
     else {
-        
         for (int i=0; i < ctx->else1()->stat().size(); ++i)
             visit(ctx->else1()->stat(i));
     }
+    return 0;
+  }
 
+  // stat: WHILE expr 'do' stat+ ENDWHILE
+  antlrcpp::Any visitWhile(CalcParser::WhileContext *ctx) {
+    int left = visit(ctx->expr());         // get value of left subexpression
+    while (left) {     // get value of right subexpression;
+        for (int i=0; i < ctx->stat().size(); ++i){
+            visit(ctx->stat(i));
+        }
+        left = visit(ctx->expr());
+    }
+    //while (left) visit(ctx->stat());
     return 0;
   }
   
