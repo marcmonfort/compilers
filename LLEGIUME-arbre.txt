@@ -1,0 +1,19 @@
+
+Com visualitzar l'arbre que genera el parser.
+---------------------------------------------
+
+Per visualitzar l'arbre hem de generar la versio Java del parser:
+
+# definir comandes i classpaths 
+# (sols cal un cop per sessio. Es pot posar al .tcshrc)
+$> source /assig/cl/tcshrc.CL-GRAU.antlr4
+
+# Compilar la gramatica de la practica amb la versio Java de antlr4
+$> cd practica/asl
+$> antlr4 Asl.g4
+$> javac *java
+
+# Executar l'eina grun per visualitzar l'arbre
+grun Asl program -tree ../examples/jpbasic_chkt_01.asl
+grun Asl program -gui ../examples/jpbasic_chkt_01.asl
+

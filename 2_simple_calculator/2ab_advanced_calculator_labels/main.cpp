@@ -11,6 +11,8 @@
 #include <cstdio>     // fopen
 #include <cstdlib>    // EXIT_FAILURE, EXIT_SUCCESS
 
+#include <algorithm>
+
 // using namespace std;
 // using namespace antlr4;
 // using namespace antlrcpp;
@@ -38,19 +40,72 @@ public:
     return 0;                               // return dummy value
   }
 
-  // expr : expr MUL expr
+  // stat : IF expr THEN stat
+  antlrcpp::Any visitIf(CalcParser::IfContext *ctx) {
+    int left = visit(ctx->expr());         // get value of left subexpression
+    if (left) visit(ctx->stat()){        // get value of right subexpression;
+        for (int i=0; i<ctx->stat().size(); ++i)
+            ctx->stat(i);
+    }
+    else
+
+    return 0;
+  }
+  
+  
+  
+  
+  // expr : SUB expr
+  antlrcpp::Any visitNot(CalcParser::NotContext *ctx) {
+    int left = visit(ctx->expr());         // get value of left subexpression
+    return -left;
+  }
+  
+  // expr : LPAR expr RPAR
+  antlrcpp::Any visitPar(CalcParser::ParContext *ctx) {
+    int left = visit(ctx->expr());         // get value of left subexpression
+    return left;
+  }
+  
+  // expr : expr (MUL|DIV) expr
   antlrcpp::Any visitProd(CalcParser::ProdContext *ctx) {
     int left = visit(ctx->expr(0));         // get value of left subexpression
     int right = visit(ctx->expr(1));        // get value of right subexpression
-    return left*right;
+    if (ctx->MUL()) return left*right;
+    else return left/right;
   }
   
-  // expr : expr ADD expr
+  // expr : expr (ADD|SUB) expr
   antlrcpp::Any visitPlus(CalcParser::PlusContext *ctx) {
     int left = visit(ctx->expr(0));         // get value of left subexpression
     int right = visit(ctx->expr(1));        // get value of right subexpression
-    return left+right;
+    if (ctx->ADD()) return left+right;
+    else return left-right;
   }
+  
+  // expr : MIN LPAR expr ',' expr RPAR
+  antlrcpp::Any visitMax(CalcParser::MaxContext *ctx) {
+    int left = visit(ctx->expr(0));         // get value of left subexpression
+    int right = visit(ctx->expr(1));        // get value of right subexpression
+    if (ctx->MAX()) return std::max(left,right);
+    else return std::min(left,right);
+  }
+  
+  // expr : exp CMP expr
+  antlrcpp::Any visitComp(CalcParser::CompContext *ctx) {
+    int left = visit(ctx->expr(0));         // get value of left subexpression
+    int right = visit(ctx->expr(1));        // get value of right subexpression
+    if (ctx->EQ()) return int(left == right);
+    else if (ctx->NEQ()) return int(left != right);
+    else if (ctx->LT()) return int(left < right);
+    else return int(left > right);
+  }
+  
+  
+  
+  
+  
+  
   
   // expr : INT
   antlrcpp::Any visitInt(CalcParser::IntContext *ctx) {

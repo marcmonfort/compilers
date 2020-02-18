@@ -2,19 +2,52 @@ grammar Calc;
 
 prog:  stat+ EOF ;
 
-stat:  expr NEWLINE           # printExpr
-    |  ID '=' expr NEWLINE    # assign
-    |  NEWLINE                # blank
+stat:  expr NEWLINE                                 # printExpr
+    |  ID '=' expr NEWLINE                          # assign
+    |  IF expr THEN stat+ else ENDIF                # if
+    |  NEWLINE                                      # blank
+    ;
+    
+else: (ELSE stat+ | )
     ;
 
-expr:  expr MUL expr    # prod
-    |  expr ADD expr    # plus
-    |  INT              # int
-    |  ID               # id
+expr:  SUB expr                             # not
+    |  LPAR expr RPAR                       # par
+    |  expr (MUL|DIV) expr                  # prod
+    |  expr (ADD|SUB) expr                  # plus
+    |  (MAX|MIN) LPAR expr ',' expr RPAR    # max
+    |  expr (EQ|NEQ|LT|GT) expr             # comp
+    |  INT                                  # int
+    |  ID                                   # id
     ;
+    
 
+    
+    
 MUL :  '*' ;
 ADD :  '+' ;
+
+DIV :  '/' ;
+SUB :  '-' ;
+
+MAX : 'max';
+MIN : 'min';
+
+EQ  : '==' ;
+NEQ : '!=' ;
+LT  :  '<' ;
+GT  :  '>' ;
+
+LPAR : '(' ;
+RPAR : ')' ;
+
+IF  : 'if' ;
+THEN:'then';
+ELSE:'else';
+ENDIF:'endif';
+
+
+
 ID  :  [a-zA-Z]+ ;       // match identifiers
 INT :  [0-9]+ ;          // match integers
 NEWLINE: '\r'? '\n' ;    // return newlines to parser (is end-statement signal)
