@@ -43,11 +43,15 @@ public:
   // stat : IF expr THEN stat
   antlrcpp::Any visitIf(CalcParser::IfContext *ctx) {
     int left = visit(ctx->expr());         // get value of left subexpression
-    if (left) visit(ctx->stat()){        // get value of right subexpression;
+    if (left) {     // get value of right subexpression;
         for (int i=0; i<ctx->stat().size(); ++i)
-            ctx->stat(i);
+            visit(ctx->stat(i));
     }
-    else
+    else {
+        
+        for (int i=0; i < ctx->else1()->stat().size(); ++i)
+            visit(ctx->else1()->stat(i));
+    }
 
     return 0;
   }

@@ -51,7 +51,7 @@ WS
 rule names:
 prog
 stat
-else
+else1
 expr
 
 

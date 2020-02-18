@@ -4,11 +4,11 @@ prog:  stat+ EOF ;
 
 stat:  expr NEWLINE                                 # printExpr
     |  ID '=' expr NEWLINE                          # assign
-    |  IF expr THEN stat+ else ENDIF                # if
+    |  IF expr THEN stat+ else1 ENDIF                # if
     |  NEWLINE                                      # blank
     ;
     
-else: (ELSE stat+ | )
+else1: (ELSE stat+ | )
     ;
 
 expr:  SUB expr                             # not
