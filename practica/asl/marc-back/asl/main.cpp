@@ -119,8 +119,8 @@ int main(int argc, const char* argv[]) {
 
   // create a third visitor that will return the generated code
   // for each part of the tree, and will store it in 'mycode'
-  CodeGenVisitor codegenerator(types, symbols, decorations);    //COMENTAR para hacer test
-  code mycode = codegenerator.visit(tree);                      //COMENTAR
+  CodeGenVisitor codegenerator(types, symbols, decorations);
+  code mycode = codegenerator.visit(tree);
 
   // print generated code as output
   std::cout << mycode.dump() << std::endl;
