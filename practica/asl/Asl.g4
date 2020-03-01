@@ -50,6 +50,9 @@ variable_decl
         ;
 
 type    : INT
+        | FLOAT         //NEW
+        | BOOL          //NEW
+        | CHAR          //NEW
         ;
 
 statements
@@ -77,11 +80,14 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : expr op=MUL expr                    # arithmetic
-        | expr op=PLUS expr                   # arithmetic
-        | expr op=EQUAL expr                  # relational
-        | INTVAL                              # value
-        | ident                               # exprIdent
+expr    : op=(SUB|NOT|PLUS) expr                        # symbol          //NEW arithmetic???
+        | LPAR expr RPAR                                # parentesis      //NEW
+        | expr op=(MUL|DIV) expr                        # arithmetic      //NEW
+        | expr op=(PLUS|SUB) expr                       # arithmetic      //NEW
+        | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational      
+        | expr op=(AND|OR) expr                         # logic           //NEW
+        | (INTVAL|FLOATVAL|CHARVAL)                     # value           //NEW
+        | ident                                         # exprIdent
         ;
 
 ident   : ID
@@ -92,21 +98,52 @@ ident   : ID
 //////////////////////////////////////////////////
 
 ASSIGN    : '=' ;
-EQUAL     : '==' ;
+//EQUAL     : '==' ;            //OLD maybe problems...
+
 PLUS      : '+' ;
+SUB       : '-';                //NEW
 MUL       : '*';
+DIV       : '/';                //NEW
+
+EQ        : '==' ;              //NEW
+NEQ       : '!=' ;              //NEW
+GT        : '>' ;               //NEW
+GTE       : '>=' ;              //NEW
+LT        : '<' ;               //NEW
+LTE       : '<=' ;              //NEW
+
+AND       : 'and';              //NEW
+OR        : 'or';               //NEW
+NOT       : 'not';              //NEW
+
+
+LPAR      : '(';                //NEW
+RPAR      : ')';                //NEW
+
 VAR       : 'var';
+
 INT       : 'int';
+BOOL      : 'bool';             //NEW
+FLOAT     : 'float';	        //NEW
+CHAR      : 'char';             //NEW
+
 IF        : 'if' ;
 THEN      : 'then' ;
 ELSE      : 'else' ;
 ENDIF     : 'endif' ;
+
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
+
 READ      : 'read' ;
 WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+
 INTVAL    : ('0'..'9')+ ;
+FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;               //NEW
+CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ; 	//NEW
+BOOLVAR   : 'True'|'False';                             //NEW
+
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
