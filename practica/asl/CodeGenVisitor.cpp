@@ -105,7 +105,12 @@ antlrcpp::Any CodeGenVisitor::visitVariable_decl(AslParser::Variable_declContext
   TypesMgr::TypeId   t1 = getTypeDecor(ctx->type());
   std::size_t      size = Types.getSizeOfType(t1);
   DEBUG_EXIT();
-  return var{ctx->ID()->getText(), size};
+
+  for (unsigned int i = 0; i < ctx->ID().size(); i++) {   //NEW
+
+  return var{ctx->ID(i)->getText(), size};    //instead of ID()
+
+  }
 }
 
 antlrcpp::Any CodeGenVisitor::visitStatements(AslParser::StatementsContext *ctx) {

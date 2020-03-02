@@ -46,13 +46,13 @@ declarations
         ;
 
 variable_decl
-        : VAR ID ':' type
+        : VAR ID (','ID)* ':' type      //NEW
         ;
 
 type    : INT
-        | FLOAT         //NEW
-        | BOOL          //NEW
-        | CHAR          //NEW
+        | FLOAT         
+        | BOOL          
+        | CHAR          
         ;
 
 statements
@@ -80,13 +80,13 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : op=(SUB|NOT|PLUS) expr                        # symbol          //NEW arithmetic???
-        | LPAR expr RPAR                                # parentesis      //NEW
-        | expr op=(MUL|DIV) expr                        # arithmetic      //NEW
-        | expr op=(PLUS|SUB) expr                       # arithmetic      //NEW
+expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
+        | LPAR expr RPAR                                # parentesis      
+        | expr op=(MUL|DIV) expr                        # arithmetic      
+        | expr op=(PLUS|SUB) expr                       # arithmetic      
         | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational      
-        | expr op=(AND|OR) expr                         # logic           //NEW
-        | (INTVAL|FLOATVAL|CHARVAL)                     # value           //NEW
+        | expr op=(AND|OR) expr                         # logic           
+        | (INTVAL|FLOATVAL|CHARVAL)                     # value           
         | ident                                         # exprIdent
         ;
 
@@ -101,31 +101,31 @@ ASSIGN    : '=' ;
 //EQUAL     : '==' ;            //OLD maybe problems...
 
 PLUS      : '+' ;
-SUB       : '-';                //NEW
+SUB       : '-';                
 MUL       : '*';
-DIV       : '/';                //NEW
+DIV       : '/';                
 
-EQ        : '==' ;              //NEW
-NEQ       : '!=' ;              //NEW
-GT        : '>' ;               //NEW
-GTE       : '>=' ;              //NEW
-LT        : '<' ;               //NEW
-LTE       : '<=' ;              //NEW
+EQ        : '==' ;              
+NEQ       : '!=' ;              
+GT        : '>' ;               
+GTE       : '>=' ;              
+LT        : '<' ;               
+LTE       : '<=' ;              
 
-AND       : 'and';              //NEW
-OR        : 'or';               //NEW
-NOT       : 'not';              //NEW
+AND       : 'and';              
+OR        : 'or';               
+NOT       : 'not';              
 
 
-LPAR      : '(';                //NEW
-RPAR      : ')';                //NEW
+LPAR      : '(';                
+RPAR      : ')';                
 
 VAR       : 'var';
 
 INT       : 'int';
-BOOL      : 'bool';             //NEW
-FLOAT     : 'float';	        //NEW
-CHAR      : 'char';             //NEW
+BOOL      : 'bool';             
+FLOAT     : 'float';	        
+CHAR      : 'char';             
 
 IF        : 'if' ;
 THEN      : 'then' ;
@@ -140,9 +140,9 @@ WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 
 INTVAL    : ('0'..'9')+ ;
-FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;               //NEW
-CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ; 	//NEW
-BOOLVAR   : 'True'|'False';                             //NEW
+FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;               
+CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ; 	
+BOOLVAR   : 'True'|'False';                             
 
 
 // Strings (in quotes) with escape sequences
