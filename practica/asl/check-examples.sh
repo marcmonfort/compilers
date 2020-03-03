@@ -14,7 +14,7 @@ echo "END   examples-initial/typecheck"
 
  echo ""
  echo "BEGIN examples-full/typecheck"
- for f in ../examples/jp_chkt_0[1-3]*.asl; do     #UNTIL MINE
+ for f in ../examples/jp_chkt_0[1-4]*.asl; do     #UNTIL MINE
      echo $(basename $f)
      ./asl $f | egrep ^L > tmp.err
      diff tmp.err ${f/asl/err}

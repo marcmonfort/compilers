@@ -238,26 +238,15 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
 
 antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
-  /*TypesMgr::TypeId t = Types.createIntegerTy();
-  putTypeDecor(ctx, t);
-  putIsLValueDecor(ctx, false);*/
 
-	if (ctx->INTVAL()) {
-		TypesMgr::TypeId t = Types.createIntegerTy();
-		putTypeDecor(ctx, t);
-	}
-	else if (ctx->FLOATVAL()) {
-		TypesMgr::TypeId t = Types.createFloatTy();
-		putTypeDecor(ctx, t);
-	}
-	else if (ctx->BOOLVAL()) {
-		TypesMgr::TypeId t = Types.createBooleanTy();
-		putTypeDecor(ctx, t);
-	}
-	else if (ctx->CHARVAL()) {
-		TypesMgr::TypeId t = Types.createCharacterTy();
-    putTypeDecor(ctx, t);
-	}
+  TypesMgr::TypeId t = Types.createErrorTy();
+
+	if (ctx->INTVAL()) t = Types.createIntegerTy();
+	else if (ctx->FLOATVAL()) t = Types.createFloatTy();
+	else if (ctx->BOOLVAL()) t = Types.createBooleanTy();
+	else if (ctx->CHARVAL()) t = Types.createCharacterTy();
+
+	putTypeDecor(ctx, t);
 	putIsLValueDecor(ctx, false);	//what is this???
 
   DEBUG_EXIT();

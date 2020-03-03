@@ -81,20 +81,43 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   std::string funcName = ctx->ID()->getText();
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
+  
+  visit(ctx->parameters());   //NEW
+
   visit(ctx->declarations());
-  // Symbols.print();
+  //Symbols.print();
   Symbols.popScope();
   std::string ident = ctx->ID()->getText();
   if (Symbols.findInCurrentScope(ident)) {
     Errors.declaredIdent(ctx->ID());
   }
-  else {
+  else {    //hace falta mirar si hay return!!! y tambien llamar parameters!!!
     std::vector<TypesMgr::TypeId> lParamsTy;
     TypesMgr::TypeId tRet = Types.createVoidTy();
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
   }
   DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx) {    //NEW ¿¿¿¿NO entra
+  DEBUG_ENTER();
+  //visit(ctx->type());   //outside or inside???
+
+  for (int i = 0; i < ctx->ID().size(); i++) {  
+    visit(ctx->type(i));  //here ???
+    
+	  std::string ident = ctx->ID(i)->getText();
+	  if (Symbols.findInCurrentScope(ident)) {  //can it be find???
+	    Errors.declaredIdent(ctx->ID(i));
+	  }
+	  else {
+	    TypesMgr::TypeId t1 = getTypeDecor(ctx->type(i));
+	    Symbols.addParameter(ident, t1);
+	  }
+  }
+	DEBUG_EXIT();
   return 0;
 }
 
@@ -107,8 +130,10 @@ antlrcpp::Any SymbolsVisitor::visitDeclarations(AslParser::DeclarationsContext *
 
 antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext *ctx) {
   DEBUG_ENTER();
-  visit(ctx->type());
-  for (unsigned int i = 0; i < ctx->ID().size(); i++) {   //NEW
+
+
+  visit(ctx->type()); //outside or inside??? with type(i) or not???
+  for (int i = 0; i < ctx->ID().size(); i++) {   //NEW
 	  std::string ident = ctx->ID(i)->getText();
 	  if (Symbols.findInCurrentScope(ident)) {
 	    Errors.declaredIdent(ctx->ID(i));
