@@ -82,7 +82,7 @@ public:
 
   //NEW
   antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
-  //antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
+  antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx); //NEW
 
 
 

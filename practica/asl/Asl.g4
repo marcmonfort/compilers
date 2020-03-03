@@ -62,17 +62,21 @@ statements
 // The different types of instructions
 statement
           // Assignment
-        : left_expr ASSIGN expr ';'           # assignStmt
+        : left_expr ASSIGN expr ';'                     # assignStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF       # ifStmt
+        | IF expr THEN statements ENDIF                 # ifStmt
+
+        | WHILE expr 'do' statements  ENDWHILE          # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                   # procCall
+        | ident '(' ')' ';'                             # procCall
+
+        | RETURN expr? ';'                              # returnStmt    //falta definir en visitFunction(type & symbol) 
           // Read a variable
-        | READ left_expr ';'                  # readStmt
+        | READ left_expr ';'                            # readStmt
           // Write an expression
-        | WRITE expr ';'                      # writeExpr
+        | WRITE expr ';'                                # writeExpr
           // Write a string
-        | WRITE STRING ';'                    # writeString
+        | WRITE STRING ';'                              # writeString
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
@@ -132,8 +136,12 @@ THEN      : 'then' ;
 ELSE      : 'else' ;
 ENDIF     : 'endif' ;
 
+WHILE     : 'while' ;
+ENDWHILE  : 'endwhile';
+
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
+RETURN    : 'return' ;
 
 READ      : 'read' ;
 WRITE     : 'write' ;
