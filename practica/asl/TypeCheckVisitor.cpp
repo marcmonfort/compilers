@@ -63,8 +63,8 @@ TypeCheckVisitor::TypeCheckVisitor(TypesMgr       & Types,
 antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = getScopeDecor(ctx);
-  Symbols.pushThisScope(sc);  
-  for (auto ctxFunc : ctx->function()) { 
+  Symbols.pushThisScope(sc);
+  for (auto ctxFunc : ctx->function()) {
     visit(ctxFunc);
   }
   if (Symbols.noMainProperlyDeclared())
@@ -227,9 +227,28 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
 
 antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
-  TypesMgr::TypeId t = Types.createIntegerTy();
+  /*TypesMgr::TypeId t = Types.createIntegerTy();
   putTypeDecor(ctx, t);
-  putIsLValueDecor(ctx, false);
+  putIsLValueDecor(ctx, false);*/
+
+	if (ctx->INTVAL()) {		//NEW
+		TypesMgr::TypeId t = Types.createIntegerTy();
+		putTypeDecor(ctx, t);
+	}
+	else if (ctx->FLOATVAL()) {		//NEW
+		TypesMgr::TypeId t = Types.createFloatTy();
+		putTypeDecor(ctx, t);
+	}
+	else if (ctx->BOOLVAL()) {		//NEW
+		TypesMgr::TypeId t = Types.createBooleanTy();
+		putTypeDecor(ctx, t);
+	}
+	else if (ctx->CHARVAL()) {		//NEW
+		TypesMgr::TypeId t = Types.createCharacterTy();
+    putTypeDecor(ctx, t);
+	}
+	putIsLValueDecor(ctx, false);	//what is this???
+
   DEBUG_EXIT();
   return 0;
 }
@@ -265,6 +284,25 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
+
+
+
+antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {		//NEW
+  DEBUG_ENTER();
+  visit(ctx->expr(0));
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  visit(ctx->expr(1));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+  if (((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))) or
+      ((not Types.isErrorTy(t2)) and (not Types.isBooleanTy(t2))))
+    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createBooleanTy();
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
 
 
 // Getters for the necessary tree node atributes:

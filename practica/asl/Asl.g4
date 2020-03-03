@@ -50,9 +50,9 @@ variable_decl
         ;
 
 type    : INT
-        | FLOAT         
-        | BOOL          
-        | CHAR          
+        | FLOAT
+        | BOOL
+        | CHAR
         ;
 
 statements
@@ -81,12 +81,12 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
-        | LPAR expr RPAR                                # parentesis      
-        | expr op=(MUL|DIV) expr                        # arithmetic      
-        | expr op=(PLUS|SUB) expr                       # arithmetic      
-        | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational      
-        | expr op=(AND|OR) expr                         # logic           
-        | (INTVAL|FLOATVAL|CHARVAL)                     # value           
+        | LPAR expr RPAR                                # parentesis
+        | expr op=(MUL|DIV) expr                        # arithmetic
+        | expr op=(PLUS|SUB) expr                       # arithmetic
+        | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational
+        | expr op=(AND|OR) expr                         # logical
+        | (INTVAL|FLOATVAL|CHARVAL|BOOLVAL)                     # value
         | ident                                         # exprIdent
         ;
 
@@ -101,31 +101,31 @@ ASSIGN    : '=' ;
 //EQUAL     : '==' ;            //OLD maybe problems...
 
 PLUS      : '+' ;
-SUB       : '-';                
+SUB       : '-';
 MUL       : '*';
-DIV       : '/';                
+DIV       : '/';
 
-EQ        : '==' ;              
-NEQ       : '!=' ;              
-GT        : '>' ;               
-GTE       : '>=' ;              
-LT        : '<' ;               
-LTE       : '<=' ;              
+EQ        : '==' ;
+NEQ       : '!=' ;
+GT        : '>' ;
+GTE       : '>=' ;
+LT        : '<' ;
+LTE       : '<=' ;
 
-AND       : 'and';              
-OR        : 'or';               
-NOT       : 'not';              
+AND       : 'and';
+OR        : 'or';
+NOT       : 'not';
 
 
-LPAR      : '(';                
-RPAR      : ')';                
+LPAR      : '(';
+RPAR      : ')';
 
 VAR       : 'var';
 
 INT       : 'int';
-BOOL      : 'bool';             
-FLOAT     : 'float';	        
-CHAR      : 'char';             
+BOOL      : 'bool';
+FLOAT     : 'float';
+CHAR      : 'char';
 
 IF        : 'if' ;
 THEN      : 'then' ;
@@ -140,9 +140,9 @@ WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
 
 INTVAL    : ('0'..'9')+ ;
-FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;               
-CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ; 	
-BOOLVAR   : 'True'|'False';                             
+FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;
+CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ;
+BOOLVAL   : 'True'|'False';
 
 
 // Strings (in quotes) with escape sequences

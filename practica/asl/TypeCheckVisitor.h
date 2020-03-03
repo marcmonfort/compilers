@@ -80,6 +80,12 @@ public:
   antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
   antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
 
+  //NEW
+  antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);   //NEW
+  //antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);   //NEW
+
+
+
 private:
 
   // Attributes

@@ -67,7 +67,7 @@ antlrcpp::Any SymbolsVisitor::visitProgram(AslParser::ProgramContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = Symbols.pushNewScope("$global$");
   putScopeDecor(ctx, sc);
-  for (auto ctxFunc : ctx->function()) { 
+  for (auto ctxFunc : ctx->function()) {
     visit(ctxFunc);
   }
   // Symbols.print();
@@ -110,7 +110,7 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
   visit(ctx->type());
   for (unsigned int i = 0; i < ctx->ID().size(); i++) {   //NEW
 
-  
+
 
   std::string ident = ctx->ID(i)->getText();   //NEW
   if (Symbols.findInCurrentScope(ident)) {
@@ -131,6 +131,19 @@ antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
     TypesMgr::TypeId t = Types.createIntegerTy();
     putTypeDecor(ctx, t);
   }
+	else if (ctx->FLOAT()) {		//NEW
+		TypesMgr::TypeId t = Types.createFloatTy();
+    putTypeDecor(ctx, t);
+	}
+	else if (ctx->BOOL()) {		//NEW
+		TypesMgr::TypeId t = Types.createBooleanTy();
+    putTypeDecor(ctx, t);
+	}
+	else if (ctx->CHAR()) {		//NEW
+		TypesMgr::TypeId t = Types.createCharacterTy();
+    putTypeDecor(ctx, t);
+	}
+
   DEBUG_EXIT();
   return 0;
 }
