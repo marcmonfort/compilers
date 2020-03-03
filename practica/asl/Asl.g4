@@ -46,7 +46,7 @@ declarations
         ;
 
 variable_decl
-        : VAR ID (','ID)* ':' type      //NEW
+        : VAR ID (','ID)* ':' type
         ;
 
 type    : INT
@@ -137,12 +137,14 @@ ENDFUNC   : 'endfunc' ;
 
 READ      : 'read' ;
 WRITE     : 'write' ;
-ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;
+
 
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;
 CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ;
-BOOLVAL   : 'True'|'False';
+BOOLVAL   : 'true'|'false';
+
+ID        : ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ;   //hay que poner debajo de todos los nombres, para que esos tengan prioridad.
 
 
 // Strings (in quotes) with escape sequences

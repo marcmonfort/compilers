@@ -81,8 +81,8 @@ public:
   antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
 
   //NEW
-  antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);   //NEW
-  //antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);   //NEW
+  antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
+  //antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
 
 
 

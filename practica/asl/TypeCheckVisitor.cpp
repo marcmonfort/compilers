@@ -231,19 +231,19 @@ antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);*/
 
-	if (ctx->INTVAL()) {		//NEW
+	if (ctx->INTVAL()) {
 		TypesMgr::TypeId t = Types.createIntegerTy();
 		putTypeDecor(ctx, t);
 	}
-	else if (ctx->FLOATVAL()) {		//NEW
+	else if (ctx->FLOATVAL()) {
 		TypesMgr::TypeId t = Types.createFloatTy();
 		putTypeDecor(ctx, t);
 	}
-	else if (ctx->BOOLVAL()) {		//NEW
+	else if (ctx->BOOLVAL()) {
 		TypesMgr::TypeId t = Types.createBooleanTy();
 		putTypeDecor(ctx, t);
 	}
-	else if (ctx->CHARVAL()) {		//NEW
+	else if (ctx->CHARVAL()) {
 		TypesMgr::TypeId t = Types.createCharacterTy();
     putTypeDecor(ctx, t);
 	}
@@ -287,7 +287,7 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
 
 
 
-antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {		//NEW
+antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
