@@ -1,10 +1,12 @@
 antlr-src
-practica/asl/Makefile
-**/*.o
 **/Makefile
+**/*.o
+**/_ant
+**/_deps
+
 #git update-index --assume-unchanged /path
 #git update-index --no-assume-unchanged /path  (for Makefile)
-#**/_ant
-#**/_deps
-/practica/asl/marc-back
+
+practica/asl/.antlr
+
 teoria
