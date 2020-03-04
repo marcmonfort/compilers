@@ -147,7 +147,38 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
   return 0;
 }
 
+
+/*antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {  //faltaria array en otra funcion!
+  DEBUG_ENTER();
+
+  TypesMgr::TypeId t = Types.createErrorTy();
+
+  if (ctx->INT()) t = Types.createIntegerTy();
+	else if (ctx->FLOAT()) t = Types.createFloatTy();
+	else if (ctx->BOOL()) t = Types.createBooleanTy();
+	else if (ctx->CHAR()) t = Types.createCharacterTy();
+
+  putTypeDecor(ctx, t);
+
+  DEBUG_EXIT();
+  return 0;
+}*/
+
 antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {  //faltaria array en otra funcion!
+  DEBUG_ENTER();
+
+  if (ctx->basic_type()) {
+    visit(ctx->basic_type());
+    TypesMgr::TypeId t = getTypeDecor(ctx->basic_type());
+    putTypeDecor(ctx, t);
+  }
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx) {  //faltaria array en otra funcion!
   DEBUG_ENTER();
 
   TypesMgr::TypeId t = Types.createErrorTy();

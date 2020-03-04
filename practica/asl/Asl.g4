@@ -53,11 +53,24 @@ variable_decl
         : VAR ID (','ID)* ':' type
         ;
 
-type    : INT
+type
+        : basic_type
+        ;
+
+basic_type    
+        : INT
         | FLOAT
         | BOOL
         | CHAR
         ;
+
+/*type    
+        : INT
+        | FLOAT
+        | BOOL
+        | CHAR
+        ;
+*/
 
 statements
         : (statement)*
@@ -84,17 +97,18 @@ statement
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident
+        : ident ('[' expr ']')?         //NEW
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
-        | LPAR expr RPAR                                # parentesis
+        | ident '[' expr ']'                            # array_index
+        | LPAREN expr RPAREN                            # parentesis
         | expr op=(MUL|DIV) expr                        # arithmetic
         | expr op=(PLUS|SUB) expr                       # arithmetic
         | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational
         | expr op=(AND|OR) expr                         # logical
-        | (INTVAL|FLOATVAL|CHARVAL|BOOLVAL)                     # value
+        | (INTVAL|FLOATVAL|CHARVAL|BOOLVAL)             # value
         | ident                                         # exprIdent
         ;
 
@@ -125,8 +139,8 @@ OR        : 'or';
 NOT       : 'not';
 
 
-LPAR      : '(';
-RPAR      : ')';
+LPAREN      : '(';
+RPAREN      : ')';
 
 VAR       : 'var';
 

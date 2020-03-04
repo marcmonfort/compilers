@@ -195,13 +195,71 @@ antlrcpp::Any TypeCheckVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx)
 antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->ident());
-  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
-  putTypeDecor(ctx, t1);
+  TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
   bool b = getIsLValueDecor(ctx->ident());
-  putIsLValueDecor(ctx, b);
+
+
+  if (ctx->expr()) {  //is array
+    visit(ctx->expr());
+
+    TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+    bool array_okay = not Types.isErrorTy(tID);
+
+    if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
+      Errors.nonArrayInArrayAccess(ctx);
+      //tID = Types.createErrorTy();    //NOSE
+      //b = False;
+      array_okay = false;
+    }
+    if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
+      Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+      array_okay = false;
+      //poner tID como errorType ???
+    }
+    if (array_okay) {
+      //tID = Types.getArrayElemType(tID);
+      //b = true;
+    }
+  }
+  putTypeDecor(ctx, tID);
+  putIsLValueDecor(ctx, b);   //QUE ES???
   DEBUG_EXIT();
   return 0;
 }
+
+antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *ctx) {    //NEW
+  DEBUG_ENTER();
+
+  visit(ctx->ident());
+  TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
+  visit(ctx->expr());
+  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+
+  bool array_okay = not Types.isErrorTy(tID);
+
+  if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
+    Errors.nonArrayInArrayAccess(ctx);
+    //tID = Types.createErrorTy();    //NOSE
+    //b = False;
+    array_okay = false;
+  }
+  if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+    array_okay = false;
+    //poner tID como errorType ???
+  }
+  if (array_okay) {
+    //tID = Types.getArrayElemType(tID);
+    //b = true;
+  }
+
+  putTypeDecor(ctx, tID);
+
+
+  DEBUG_EXIT();
+  return 0;
+}
+
 
 antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx) {
   DEBUG_ENTER();
@@ -219,7 +277,7 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {  //NOTHING
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
@@ -236,7 +294,7 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {  //NOTHING
   DEBUG_ENTER();
 
   TypesMgr::TypeId t = Types.createErrorTy();
@@ -253,7 +311,7 @@ antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx) {  //NOTHING
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
@@ -264,7 +322,7 @@ antlrcpp::Any TypeCheckVisitor::visitExprIdent(AslParser::ExprIdentContext *ctx)
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {  //NOTHINg
   DEBUG_ENTER();
   std::string ident = ctx->getText();
   if (Symbols.findInStack(ident) == -1) {

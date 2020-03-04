@@ -82,7 +82,8 @@ public:
 
   //NEW
   antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
-  antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx); //NEW
+  antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx);
+  antlrcpp::Any visitArray_index(AslParser::Array_indexContext *ctx);  //NEW
 
 
 

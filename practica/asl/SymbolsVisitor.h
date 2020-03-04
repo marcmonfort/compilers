@@ -82,6 +82,8 @@ public:
 
   //NEW
   antlrcpp::Any visitParameters(AslParser::ParametersContext *ctx);
+  antlrcpp::Any visitBasic_type(AslParser::Basic_typeContext *ctx);
+
 
 
 
