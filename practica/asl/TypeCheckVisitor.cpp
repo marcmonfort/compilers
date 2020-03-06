@@ -362,6 +362,27 @@ antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {
 }
 
 
+antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callContext *ctx) {
+  DEBUG_ENTER();
+
+  visit(ctx->ident());  //!!!!
+
+  TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
+  TypesMgr::TypeId t = Types.createErrorTy();
+
+  if (not Types.isFunctionTy(tID)) {
+    Errors.isNotCallable(ctx->ident());
+  }
+  t = Types.getFuncReturnType(tID);
+
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
 
 // Getters for the necessary tree node atributes:
 //   Scope, Type ans IsLValue

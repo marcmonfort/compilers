@@ -38,7 +38,7 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : FUNC ID '(' parameters ')' (':' type)? declarations statements ENDFUNC
+        : FUNC ID '(' parameters ')' (':' basic_type)? declarations statements ENDFUNC          //return type???
         ;
         
 parameters
@@ -64,13 +64,6 @@ basic_type
         | CHAR
         ;
 
-/*type    
-        : INT
-        | FLOAT
-        | BOOL
-        | CHAR
-        ;
-*/
 
 statements
         : (statement)*
@@ -103,6 +96,7 @@ left_expr
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
         | ident '[' expr ']'                            # array_index
+        | ident '(' ')'                                 # function_call
         | LPAREN expr RPAREN                            # parentesis
         | expr op=(MUL|DIV) expr                        # arithmetic
         | expr op=(PLUS|SUB) expr                       # arithmetic
