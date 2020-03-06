@@ -93,7 +93,13 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   }
   else {    //hace falta mirar si hay return!!! y tambien llamar parameters!!!
     std::vector<TypesMgr::TypeId> lParamsTy;
+
     TypesMgr::TypeId tRet = Types.createVoidTy();
+    if (ctx->basic_type()) {
+      visit(ctx->basic_type());
+      tRet = getTypeDecor(ctx->basic_type());
+    }
+
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
   }

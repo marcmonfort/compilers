@@ -373,7 +373,14 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
   if (not Types.isFunctionTy(tID)) {
     Errors.isNotCallable(ctx->ident());
   }
-  t = Types.getFuncReturnType(tID);
+  else {
+
+    if (Types.isVoidFunction(tID)){
+      Errors.isNotFunction(ctx->ident());
+    }
+    else t = Types.getFuncReturnType(tID);
+
+  }
 
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);

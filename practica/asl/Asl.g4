@@ -78,7 +78,7 @@ statement
 
         | WHILE expr 'do' statements  ENDWHILE          # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                             # procCall
+        | ident '(' (expr (',' expr)*)? ')' ';'         # procCall
 
         | RETURN expr? ';'                              # returnStmt    //falta definir en visitFunction(type & symbol) 
           // Read a variable
@@ -96,7 +96,7 @@ left_expr
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
         | ident '[' expr ']'                            # array_index
-        | ident '(' ')'                                 # function_call
+        | ident '(' (expr (',' expr)*)? ')'             # function_call
         | LPAREN expr RPAREN                            # parentesis
         | expr op=(MUL|DIV) expr                        # arithmetic
         | expr op=(PLUS|SUB) expr                       # arithmetic
