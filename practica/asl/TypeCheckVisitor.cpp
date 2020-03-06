@@ -207,8 +207,8 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
 
     if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
       Errors.nonArrayInArrayAccess(ctx);
-      //tID = Types.createErrorTy();    //NOSE
-      //b = False;
+      tID = Types.createErrorTy(); //no acumula mas errores
+      //b = False;  //NOSE
       array_okay = false;
     }
     if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
