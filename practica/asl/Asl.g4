@@ -55,7 +55,13 @@ variable_decl
 
 type
         : basic_type
+        | array_type
         ;
+
+array_type
+        : ARRAY '[' INTVAL ']' 'of' basic_type
+        ;
+
 
 basic_type    
         : INT
@@ -142,6 +148,8 @@ INT       : 'int';
 BOOL      : 'bool';
 FLOAT     : 'float';
 CHAR      : 'char';
+
+ARRAY     : 'array' ;
 
 IF        : 'if' ;
 THEN      : 'then' ;

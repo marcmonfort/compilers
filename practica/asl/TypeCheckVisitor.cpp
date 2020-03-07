@@ -217,7 +217,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
       //poner tID como errorType ???
     }
     if (array_okay) {
-      //tID = Types.getArrayElemType(tID);
+      tID = Types.getArrayElemType(tID);
       //b = true;
     }
   }

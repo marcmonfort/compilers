@@ -173,11 +173,19 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
 antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {  //faltaria array en otra funcion!
   DEBUG_ENTER();
 
+  TypesMgr::TypeId t;
+
   if (ctx->basic_type()) {
     visit(ctx->basic_type());
-    TypesMgr::TypeId t = getTypeDecor(ctx->basic_type());
+    t = getTypeDecor(ctx->basic_type());
     putTypeDecor(ctx, t);
   }
+  else {
+    visit(ctx->array_type());
+    t = getTypeDecor(ctx->array_type());
+  }
+
+  putTypeDecor(ctx, t);
 
   DEBUG_EXIT();
   return 0;
@@ -193,6 +201,24 @@ antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx)
 	else if (ctx->FLOAT()) t = Types.createFloatTy();
 	else if (ctx->BOOL()) t = Types.createBooleanTy();
 	else if (ctx->CHAR()) t = Types.createCharacterTy();
+
+  putTypeDecor(ctx, t);
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any SymbolsVisitor::visitArray_type(AslParser::Array_typeContext *ctx) {  //faltaria array en otra funcion!
+  DEBUG_ENTER();
+
+  //TypesMgr::TypeId t = Types.createErrorTy();
+
+  //visit(ctx->INTVAL());
+  unsigned int size = std::stoi(ctx->INTVAL()->getText());
+  visit(ctx->basic_type()); //hace falta???
+  TypesMgr::TypeId elemType = getTypeDecor(ctx->basic_type());
+
+  TypesMgr::TypeId t = Types.createArrayTy(size,elemType);
 
   putTypeDecor(ctx, t);
 
