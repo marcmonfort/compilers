@@ -64,6 +64,7 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
   DEBUG_ENTER();
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
+  //Symbols.print();
   for (auto ctxFunc : ctx->function()) {
     visit(ctxFunc);
   }
@@ -77,9 +78,35 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
 
 antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
+
+
+
+  //NUEVO
+  std::vector<TypesMgr::TypeId> lParamsTy;
+  TypesMgr::TypeId tRet = Types.createVoidTy();
+  if (ctx->basic_type() != NULL){
+    //visit(ctx->basic_type());   //no haria falta, ya se visito en Symbols.
+    tRet = getTypeDecor(ctx->basic_type());
+  }
+
+  TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
+  Symbols.setCurrentFunctionTy(tFunc);//HASTA AQUI
+
+
+  //Symbols.setCurrentFunctionTy(getTypeDecor(ctx));  //NEW ???? relacionado SymbolsVisitors.cpp (Function)
+
+
+  //std::cout << Types.to_string(Symbols.getCurrentFunctionTy()) << std::endl;
+  //std::cout << Types.to_string(getTypeDecor(ctx)) << std::endl;
+
+
+
+
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
-  // Symbols.print();
+
+  //Symbols.print();
+
   visit(ctx->statements());
   Symbols.popScope();
   DEBUG_EXIT();
@@ -161,6 +188,63 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
+
+
+antlrcpp::Any TypeCheckVisitor::visitReturnStmt(AslParser::ReturnStmtContext *ctx) {    //NEW
+  DEBUG_ENTER();
+
+  TypesMgr::TypeId f = Symbols.getCurrentFunctionTy();
+  //if ()
+
+  if (ctx->expr()) {
+    
+    visit(ctx->expr());
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+    TypesMgr::TypeId f = Symbols.getCurrentFunctionTy();
+
+    TypesMgr::TypeId tr = Types.getFuncReturnType(f);
+
+    /*std::cout << "hola" << std::endl;
+    if (Types.isIntegerTy(tr)) std::cout << "1" << std::endl;
+    if (Types.isErrorTy(tr)) std::cout << "2" << std::endl;
+    if (Types.isFloatTy(tr)) std::cout << "3" << std::endl;
+    if (Types.isBooleanTy(tr)) std::cout << "4" << std::endl;
+    if (Types.isCharacterTy(tr)) std::cout << "5" << std::endl;
+    if (Types.isVoidTy(tr)) std::cout << "6" << std::endl;
+    if (Types.isNumericTy(tr)) std::cout << "7" << std::endl;
+    if (Types.isPrimitiveTy(tr)) std::cout << "8" << std::endl;
+    if (Types.isPrimitiveNonVoidTy(tr)) std::cout << "9" << std::endl;
+    if (Types.isFunctionTy(tr)) std::cout << "10" << std::endl;
+    //if (Types.isVoidFunction(tr)) std::cout << "11" << std::endl;
+    std::cout << "adios" << std::endl;
+    std::cout << "mama" << std::endl;
+    if (Types.isIntegerTy(t1)) std::cout << "1" << std::endl;
+    if (Types.isErrorTy(t1)) std::cout << "2" << std::endl;
+    if (Types.isFloatTy(t1)) std::cout << "3" << std::endl;
+    if (Types.isBooleanTy(t1)) std::cout << "4" << std::endl;
+    if (Types.isCharacterTy(t1)) std::cout << "5" << std::endl;
+    if (Types.isVoidTy(t1)) std::cout << "6" << std::endl;
+    if (Types.isNumericTy(t1)) std::cout << "7" << std::endl;
+    if (Types.isPrimitiveTy(t1)) std::cout << "8" << std::endl;
+    if (Types.isPrimitiveNonVoidTy(t1)) std::cout << "9" << std::endl;
+    if (Types.isFunctionTy(t1)) std::cout << "10" << std::endl;
+    //if (Types.isVoidFunction(tr)) std::cout << "11" << std::endl;
+    std::cout << "papa" << std::endl;*/
+
+    if (Types.isVoidFunction(f)) Errors.incompatibleReturn(ctx->RETURN());  //funcion VOID salida no void
+    else if ((not Types.isErrorTy(t1)) and (not Types.equalTypes(t1, tr))){
+      if (not (Types.isIntegerTy(t1) and Types.isFloatTy(tr))) {
+        Errors.incompatibleReturn(ctx->RETURN());
+      }
+
+    }
+  }
+  else if (!Types.isVoidFunction(f)) Errors.incompatibleReturn(ctx->RETURN());  //salida void, funcion no void
+  
+  DEBUG_EXIT();
+  return 0;
+}
+
 
 antlrcpp::Any TypeCheckVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
@@ -249,7 +333,7 @@ antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *
     //poner tID como errorType ???
   }
   if (array_okay) {
-    //tID = Types.getArrayElemType(tID);
+    tID = Types.getArrayElemType(tID);
     //b = true;
   }
 

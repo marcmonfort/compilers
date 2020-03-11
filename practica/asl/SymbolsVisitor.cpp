@@ -70,7 +70,8 @@ antlrcpp::Any SymbolsVisitor::visitProgram(AslParser::ProgramContext *ctx) {
   for (auto ctxFunc : ctx->function()) {
     visit(ctxFunc);
   }
-  // Symbols.print();
+  //Symbols.print();
+  //Symbols.printCurrentScope();
   Symbols.popScope();
   DEBUG_EXIT();
   return 0;
@@ -82,11 +83,17 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
   
-  visit(ctx->parameters());   //NEW
+  /*if (ctx->parameters()) {
+    if (funcName == "main") Errors.noMainProperlyDeclared(ctx);
+    else visit(ctx->parameters());   // else???
+  }*/ //working but error in different lane...???
 
-  visit(ctx->declarations());
+  visit(ctx->parameters());
+  visit(ctx->declarations()); //++
+
   //Symbols.print();
   Symbols.popScope();
+
   std::string ident = ctx->ID()->getText();
   if (Symbols.findInCurrentScope(ident)) {
     Errors.declaredIdent(ctx->ID());
@@ -102,7 +109,10 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
 
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
+    //putTypeDecor(ctx, tFunc); //NUEVO ??? CORRECTO????? -> mejor no! da errores laterales
+    //Symbols.setCurrentFunctionTy(tFunc);
   }
+
   DEBUG_EXIT();
   return 0;
 }
