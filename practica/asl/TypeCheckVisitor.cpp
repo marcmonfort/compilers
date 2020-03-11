@@ -180,11 +180,69 @@ antlrcpp::Any TypeCheckVisitor::visitWhileStmt(AslParser::WhileStmtContext *ctx)
 
 antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
-  visit(ctx->ident());
+  /*visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
   if (not Types.isFunctionTy(t1) and not Types.isErrorTy(t1)) {
     Errors.isNotCallable(ctx->ident());
+  }*/
+
+  
+
+
+  visit(ctx->ident());  //!!!!
+  for (int i = 0; i < (ctx->expr()).size(); ++i) {  //hace falta... raro
+          visit(ctx->expr(i));
   }
+  
+
+  TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
+  TypesMgr::TypeId t = Types.createErrorTy();
+
+
+  
+
+
+  if (not Types.isFunctionTy(tID) and not Types.isErrorTy(tID)) {
+    Errors.isNotCallable(ctx->ident());
+  }
+  else if (not Types.isErrorTy(tID)){
+    t = Types.getFuncReturnType(tID);
+
+    /*if (Types.isVoidFunction(tID)){
+      Errors.isNotFunction(ctx->ident());
+      t = Types.createErrorTy();
+    }*/
+
+    
+
+    if (Types.getNumOfParameters(tID) != (ctx->expr()).size() ){
+      Errors.numberOfParameters(ctx->ident());
+    }
+    else {
+      std::vector<TypesMgr::TypeId> lParamsTy = Types.getFuncParamsTypes(tID);
+      for (int i = 0; i < lParamsTy.size(); ++i) {
+        visit(ctx->expr(i));  //si hace falta
+        //std::cout << Types.to_string(getTypeDecor(ctx->expr(i))) << std::endl;
+        //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
+
+        if (not Types.equalTypes(lParamsTy[i], getTypeDecor(ctx->expr(i)))) { //not error type ???
+          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+        }
+      }
+    }
+
+  }
+
+
+
+
+
+
+  
+
+
+
+
   DEBUG_EXIT();
   return 0;
 }
@@ -292,7 +350,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
     if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
       Errors.nonArrayInArrayAccess(ctx);
       tID = Types.createErrorTy(); //no acumula mas errores
-      //b = False;  //NOSE
+      //b = false;  //NOSE
       array_okay = false;
     }
     if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
@@ -323,13 +381,14 @@ antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *
 
   if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
     Errors.nonArrayInArrayAccess(ctx);
-    //tID = Types.createErrorTy();    //NOSE
+    tID = Types.createErrorTy();    //NOSE
     //b = False;
     array_okay = false;
   }
   if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
     array_okay = false;
+    tID = Types.createErrorTy();  //hace falta
     //poner tID como errorType ???
   }
   if (array_okay) {
@@ -450,19 +509,38 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
   DEBUG_ENTER();
 
   visit(ctx->ident());  //!!!!
+  /*for (int i = 0; i < (ctx->expr()).size(); ++i) {    //aqui no!!! porque???
+          visit(ctx->expr(i));
+  }*/
 
   TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
   TypesMgr::TypeId t = Types.createErrorTy();
 
-  if (not Types.isFunctionTy(tID)) {
+  if (not Types.isFunctionTy(tID) and not Types.isErrorTy(tID)) {
     Errors.isNotCallable(ctx->ident());
   }
   else {
+    t = Types.getFuncReturnType(tID);
 
     if (Types.isVoidFunction(tID)){
       Errors.isNotFunction(ctx->ident());
+      t = Types.createErrorTy();
     }
-    else t = Types.getFuncReturnType(tID);
+    if (Types.getNumOfParameters(tID) != (ctx->expr()).size() ){
+      Errors.numberOfParameters(ctx->ident());
+    }
+    else {
+      std::vector<TypesMgr::TypeId> lParamsTy = Types.getFuncParamsTypes(tID);
+      for (int i = 0; i < lParamsTy.size(); ++i) {
+        visit(ctx->expr(i));  //si hace falta
+        //std::cout << Types.to_string(getTypeDecor(ctx->expr(i))) << std::endl;
+        //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
+
+        if (not Types.equalTypes(lParamsTy[i], getTypeDecor(ctx->expr(i)))) { //not error type ???
+          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+        }
+      }
+    }
 
   }
 
