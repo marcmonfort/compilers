@@ -100,14 +100,15 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : op=(SUB|NOT|PLUS) expr                        # symbol           //arithmetic???
+expr    : LPAREN expr RPAREN                            # parentesis           //arithmetic???
         | ident '[' expr ']'                            # array_index
         | ident '(' (expr (',' expr)*)? ')'             # function_call
-        | LPAREN expr RPAREN                            # parentesis
-        | expr op=(MUL|DIV) expr                        # arithmetic
+        | op=(SUB|NOT|PLUS) expr                        # symbol
+        | expr op=(MUL|DIV|MOD) expr                    # arithmetic
         | expr op=(PLUS|SUB) expr                       # arithmetic
         | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational
         | expr op=(AND|OR) expr                         # logical
+        | expr OR expr                                  # logical
         | (INTVAL|FLOATVAL|CHARVAL|BOOLVAL)             # value
         | ident                                         # exprIdent
         ;
@@ -126,6 +127,7 @@ PLUS      : '+' ;
 SUB       : '-';
 MUL       : '*';
 DIV       : '/';
+MOD       : '%';
 
 EQ        : '==' ;
 NEQ       : '!=' ;
