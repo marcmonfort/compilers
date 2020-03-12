@@ -26,6 +26,12 @@ for f in ../examples/jp_chkt_1[0-9]*.asl; do     #UNTIL MINE
     diff tmp.err ${f/asl/err}
     rm -f tmp.err
 done
+for f in ../examples/jp_chkt_20.asl; do     #UNTIL MINE
+    echo $(basename $f)
+    ./asl $f | egrep ^L > tmp.err
+    diff tmp.err ${f/asl/err}
+    rm -f tmp.err
+done
 echo "END   examples-full/typecheck"
 
 

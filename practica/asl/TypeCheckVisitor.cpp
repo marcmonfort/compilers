@@ -226,7 +226,8 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
         //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
 
         if (not Types.equalTypes(lParamsTy[i], getTypeDecor(ctx->expr(i)))) { //not error type ???
-          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+          if (not (Types.isIntegerTy(getTypeDecor(ctx->expr(i))) and Types.isFloatTy(lParamsTy[i])))
+            Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
         }
       }
     }
@@ -411,18 +412,22 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
 
+  TypesMgr::TypeId t = Types.createIntegerTy();
+
   if (ctx->MOD()) {
      if (((not Types.isErrorTy(t1)) and (not Types.isIntegerTy(t1))) or 
         ((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2))))
         Errors.incompatibleOperator(ctx->op);
   }
-
-  else if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
-          ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
-    Errors.incompatibleOperator(ctx->op);
+  else {
+    if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
+            ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+      Errors.incompatibleOperator(ctx->op);
+    if (Types.isFloatTy(t1) or Types.isFloatTy(t2)) t = Types.createFloatTy();
+  }
   
 
-  TypesMgr::TypeId t = Types.createIntegerTy();
+  
   
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
@@ -547,7 +552,8 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
         //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
 
         if (not Types.equalTypes(lParamsTy[i], getTypeDecor(ctx->expr(i)))) { //not error type ???
-          Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+          if (not (Types.isIntegerTy(getTypeDecor(ctx->expr(i))) and Types.isFloatTy(lParamsTy[i])))
+            Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
         }
       }
     }
