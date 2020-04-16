@@ -470,7 +470,33 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
         Errors.incompatibleOperator(ctx->op);
   }
   else {
-    if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
+    ////  EXAM 2019 - Producte escalar
+    if (Types.isArrayTy(t1) and Types.isArrayTy(t2)){   //prod. scalar
+
+      if (Types.getArraySize(t1) != Types.getArraySize(t2))
+        Errors.incompatibleOperator(ctx->op);
+
+      TypesMgr::TypeId elem1 = Types.getArrayElemType(t1);
+      TypesMgr::TypeId elem2 = Types.getArrayElemType(t2);
+
+      if ((not Types.isErrorTy(elem1) and not Types.isIntegerTy(elem1)) or 
+          (not Types.isErrorTy(elem2) and not Types.isIntegerTy(elem2))){
+        if ((not Types.isErrorTy(elem1) and not Types.isFloatTy(elem1)) or 
+            (not Types.isErrorTy(elem2) and not Types.isFloatTy(elem2))){
+          Errors.incompatibleOperator(ctx->op);
+        }
+      }
+
+      if (Types.isFloatTy(elem1) and Types.isFloatTy(elem2)) {
+        t = Types.createFloatTy();
+      }
+      //t = 
+          // no I
+
+
+    }
+    ////  FI 
+    else if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
             ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
       Errors.incompatibleOperator(ctx->op);
     if (Types.isFloatTy(t1) or Types.isFloatTy(t2)) t = Types.createFloatTy();

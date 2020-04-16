@@ -94,6 +94,7 @@ statement
           // Write a string
         | WRITE STRING ';'                                              # writeString
         ;
+        
 // Grammar for left expressions (l-values in C++)
 left_expr
         : ident ('[' expr ']')? 
