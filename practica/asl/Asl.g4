@@ -80,7 +80,7 @@ statement
           // Assignment
         : left_expr ASSIGN expr ';'                                     # assignStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements /*(ELSE statements)?*/ ENDIF          # ifStmt
+        | IF expr THEN statements (ELSE statements)? ENDIF              # ifStmt
 
         | WHILE expr 'do' statements  ENDWHILE                          # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
@@ -101,6 +101,7 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : '(' expr ')'                                  # parenthesis
+        | expr op=A_MAX                                 # arrayMax //exam 2019
         | ident '[' expr ']'                            # array_index
         | ident '(' (expr (',' expr)*)? ')'             # function_call
         | op=(NOT|PLUS|SUB) expr                        # unary
@@ -165,6 +166,10 @@ RETURN    : 'return' ;
 
 READ      : 'read' ;
 WRITE     : 'write' ;
+
+// --- Exam 2019  ---
+
+A_MAX       : '.max';
 
 // --- Values  ---
 INTVAL    : ('0'..'9')+ ;

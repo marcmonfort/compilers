@@ -148,7 +148,7 @@ antlrcpp::Any CodeGenVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   CodeAttribs     && codAtsE = visit(ctx->expr());
   std::string          addr1 = codAtsE.addr;
   instructionList &    code1 = codAtsE.code;
-  instructionList &&   code2 = visit(ctx->statements());
+  instructionList &&   code2 = visit(ctx->statements(0)); //NEW falta ELSE
   std::string label = codeCounters.newLabelIF();
   std::string labelEndIf = "endif"+label;
   code = code1 || instruction::FJUMP(addr1, labelEndIf) ||

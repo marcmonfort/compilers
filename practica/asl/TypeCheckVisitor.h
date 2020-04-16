@@ -87,8 +87,11 @@ public:
   antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
   antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
 
-  //antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);   //hace falta???
-  antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx); //hace falta??
+  antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
+  antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx);
+
+  // EXAM 2019
+  antlrcpp::Any visitArrayMax(AslParser::ArrayMaxContext *ctx);
 
 
 

@@ -140,8 +140,11 @@ antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
   if ((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1)))
     Errors.booleanRequired(ctx);
-  visit(ctx->statements());  
-  //visit(ctx->statements(1));  //ELSE ¿¿¿evaluar siempre el else???
+  visit(ctx->statements(0));
+
+  if (ctx->ELSE())
+    visit(ctx->statements(1));  //ELSE ¿¿¿evaluar siempre el else???
+
   DEBUG_EXIT();
   return 0;
 }
@@ -320,7 +323,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
 ////  ////  ////  ////  ////  ////  ////  ////
 
 
-/* antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx) { //hace falta???
+antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx) {
   DEBUG_ENTER();
 
   visit(ctx->expr());
@@ -333,7 +336,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
 
   DEBUG_EXIT();
   return 0;
-} */
+}
 
 
 antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *ctx) {
@@ -456,6 +459,9 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
 
+          /* std::cout << Types.to_string(t1) << std::endl;
+          std::cout << Types.to_string(t2) << std::endl; */
+
   TypesMgr::TypeId t = Types.createIntegerTy();
 
   if (ctx->MOD()) {   //MOD solo a enteros
@@ -469,7 +475,7 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
       Errors.incompatibleOperator(ctx->op);
     if (Types.isFloatTy(t1) or Types.isFloatTy(t2)) t = Types.createFloatTy();
   }
-  
+    
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
 
@@ -485,6 +491,10 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
   std::string oper = ctx->op->getText();
+
+        /* std::cout << Types.to_string(t1) << std::endl;
+        std::cout << Types.to_string(t2) << std::endl; */
+
 
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
       (not Types.comparableTypes(t1, t2, oper)))    //check bool -> (==) y (!=), y float-int, o deberia...
@@ -579,6 +589,36 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
+
+
+////  ////  ////  ////
+//// EXAM 2019    ////
+////  ////  ////  ////
+
+antlrcpp::Any TypeCheckVisitor::visitArrayMax(AslParser::ArrayMaxContext *ctx) {
+  DEBUG_ENTER();
+
+  visit(ctx->expr());
+  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
+
+  TypesMgr::TypeId elem = Types.createErrorTy();
+
+  if (not Types.isErrorTy(t) and not Types.isArrayTy(t))  //no es array
+    Errors.incompatibleOperator(ctx->op);
+
+  else if (not Types.isErrorTy(t)) {   //es array
+    elem = Types.getArrayElemType(t);
+    if (Types.isBooleanTy(elem))   //es array pero de bool
+      Errors.incompatibleOperator(ctx->op);
+  }
+
+  putTypeDecor(ctx, elem);
+  putIsLValueDecor(ctx, false);
+
+  DEBUG_EXIT();
+  return 0;
+}
+
 
 
 
