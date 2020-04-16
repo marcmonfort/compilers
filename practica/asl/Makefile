@@ -78,8 +78,8 @@ ANTLR4FLAGS += -o $(GENDIR)
 endif
 
 # The root directory of your antlr4 runtime is ...
-#ANTLR_ROOT := /usr/local
-ANTLR_ROOT := /assig/cl/runtime
+ANTLR_ROOT := /usr/local
+#ANTLR_ROOT := /assig/cl/runtime
 
 # Where to find various parts of the runtime files
 INCDIR		:= $(ANTLR_ROOT)/include/antlr4-runtime/

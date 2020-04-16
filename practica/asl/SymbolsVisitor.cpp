@@ -82,37 +82,33 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   std::string funcName = ctx->ID()->getText();
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
-  
-  /*if (ctx->parameters()) {
-    if (funcName == "main") Errors.noMainProperlyDeclared(ctx);
-    else visit(ctx->parameters());   // else???
-  }*/ //working but error in different lane...???
 
   visit(ctx->parameters());
-  visit(ctx->declarations()); //++
+  visit(ctx->declarations());
 
   //Symbols.print();
   Symbols.popScope();
 
   std::string ident = ctx->ID()->getText();
-  if (Symbols.findInCurrentScope(ident)) {
+  if (Symbols.findInCurrentScope(ident)) {  //nombre funcion ya declarado en scope
     Errors.declaredIdent(ctx->ID());
   }
-  else {    //hace falta mirar si hay return!!! y tambien llamar parameters!!!
+  else {
     std::vector<TypesMgr::TypeId> lParamsTy;
-    for (int i = 0; i < ctx->parameters()->type().size(); ++i){
+    for (size_t i = 0; i < ctx->parameters()->type().size(); ++i){  //parametros funcion
       lParamsTy.push_back(getTypeDecor(ctx->parameters()->type(i)));
     }
 
     TypesMgr::TypeId tRet = Types.createVoidTy();
-    if (ctx->basic_type()) {
+    if (ctx->basic_type()) {  
       visit(ctx->basic_type());
-      tRet = getTypeDecor(ctx->basic_type());
+      tRet = getTypeDecor(ctx->basic_type());   //tipo return
     }
 
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
-    //putTypeDecor(ctx, tFunc); //NUEVO ??? CORRECTO????? -> mejor no! da errores laterales
+
+    //putTypeDecor(ctx, tFunc); //ERROR mejor no! error cuando no entra en el else (chkt_04)
     //Symbols.setCurrentFunctionTy(tFunc);
   }
 
@@ -120,15 +116,14 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   return 0;
 }
 
-antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx) {    //NEW ¿¿¿¿NO entra
+antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx) {
   DEBUG_ENTER();
-  //visit(ctx->type());   //outside or inside???
 
-  for (int i = 0; i < ctx->ID().size(); i++) {  
-    visit(ctx->type(i));  //here ???
-    
+  for (size_t i = 0; i < ctx->ID().size(); i++) {  
+    visit(ctx->type(i));
+
 	  std::string ident = ctx->ID(i)->getText();
-	  if (Symbols.findInCurrentScope(ident)) {  //can it be find???
+	  if (Symbols.findInCurrentScope(ident)) {  //parametro ya declarado
 	    Errors.declaredIdent(ctx->ID(i));
 	  }
 	  else {
@@ -150,9 +145,8 @@ antlrcpp::Any SymbolsVisitor::visitDeclarations(AslParser::DeclarationsContext *
 antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext *ctx) {
   DEBUG_ENTER();
 
-
-  visit(ctx->type()); //outside or inside??? with type(i) or not???
-  for (int i = 0; i < ctx->ID().size(); i++) {   //NEW
+  visit(ctx->type()); //solo un type
+  for (size_t i = 0; i < ctx->ID().size(); i++) {   //por cada ID
 	  std::string ident = ctx->ID(i)->getText();
 	  if (Symbols.findInCurrentScope(ident)) {
 	    Errors.declaredIdent(ctx->ID(i));
@@ -167,37 +161,18 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
 }
 
 
-/*antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {  //faltaria array en otra funcion!
-  DEBUG_ENTER();
-
-  TypesMgr::TypeId t = Types.createErrorTy();
-
-  if (ctx->INT()) t = Types.createIntegerTy();
-	else if (ctx->FLOAT()) t = Types.createFloatTy();
-	else if (ctx->BOOL()) t = Types.createBooleanTy();
-	else if (ctx->CHAR()) t = Types.createCharacterTy();
-
-  putTypeDecor(ctx, t);
-
-  DEBUG_EXIT();
-  return 0;
-}*/
-
-antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {  //faltaria array en otra funcion!
+antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
   DEBUG_ENTER();
 
   TypesMgr::TypeId t;
-
-  if (ctx->basic_type()) {
+  if (ctx->basic_type()) {    //basic type
     visit(ctx->basic_type());
     t = getTypeDecor(ctx->basic_type());
-    putTypeDecor(ctx, t);
   }
-  else {
+  else {    //array
     visit(ctx->array_type());
     t = getTypeDecor(ctx->array_type());
   }
-
   putTypeDecor(ctx, t);
 
   DEBUG_EXIT();
@@ -209,30 +184,25 @@ antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx)
   DEBUG_ENTER();
 
   TypesMgr::TypeId t = Types.createErrorTy();
-
-  if (ctx->INT()) t = Types.createIntegerTy();
-	else if (ctx->FLOAT()) t = Types.createFloatTy();
-	else if (ctx->BOOL()) t = Types.createBooleanTy();
-	else if (ctx->CHAR()) t = Types.createCharacterTy();
-
+  if      (ctx->INT())    t = Types.createIntegerTy();
+	else if (ctx->FLOAT())  t = Types.createFloatTy();
+	else if (ctx->BOOL())   t = Types.createBooleanTy();
+	else if (ctx->CHAR())   t = Types.createCharacterTy();
   putTypeDecor(ctx, t);
 
   DEBUG_EXIT();
   return 0;
 }
 
-antlrcpp::Any SymbolsVisitor::visitArray_type(AslParser::Array_typeContext *ctx) {  //faltaria array en otra funcion!
+antlrcpp::Any SymbolsVisitor::visitArray_type(AslParser::Array_typeContext *ctx) { 
   DEBUG_ENTER();
 
-  //TypesMgr::TypeId t = Types.createErrorTy();
+  unsigned int size = std::stoi(ctx->INTVAL()->getText());  //size of array (no visitamos porque es token)
 
-  //visit(ctx->INTVAL());
-  unsigned int size = std::stoi(ctx->INTVAL()->getText());
-  visit(ctx->basic_type()); //hace falta???
-  TypesMgr::TypeId elemType = getTypeDecor(ctx->basic_type());
-
+  visit(ctx->basic_type());
+  TypesMgr::TypeId elemType = getTypeDecor(ctx->basic_type());  //elements type
+  
   TypesMgr::TypeId t = Types.createArrayTy(size,elemType);
-
   putTypeDecor(ctx, t);
 
   DEBUG_EXIT();

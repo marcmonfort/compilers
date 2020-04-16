@@ -78,38 +78,38 @@ statements
 // The different types of instructions
 statement
           // Assignment
-        : left_expr ASSIGN expr ';'                     # assignStmt
+        : left_expr ASSIGN expr ';'                                     # assignStmt
           // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF                 # ifStmt
+        | IF expr THEN statements /*(ELSE statements)?*/ ENDIF          # ifStmt
 
-        | WHILE expr 'do' statements  ENDWHILE          # whileStmt
+        | WHILE expr 'do' statements  ENDWHILE                          # whileStmt
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' (expr (',' expr)*)? ')' ';'         # procCall
+        | ident '(' (expr (',' expr)*)? ')' ';'                         # procCall
 
-        | RETURN expr? ';'                              # returnStmt    //falta definir en visitFunction(type & symbol) 
+        | RETURN expr? ';'                                              # returnStmt 
           // Read a variable
-        | READ left_expr ';'                            # readStmt
+        | READ left_expr ';'                                            # readStmt
           // Write an expression
-        | WRITE expr ';'                                # writeExpr
+        | WRITE expr ';'                                                # writeExpr
           // Write a string
-        | WRITE STRING ';'                              # writeString
+        | WRITE STRING ';'                                              # writeString
         ;
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident ('[' expr ']')?         //NEW
+        : ident ('[' expr ']')? 
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : LPAREN expr RPAREN                            # parentesis           //arithmetic???
+expr    : '(' expr ')'                                  # parenthesis
         | ident '[' expr ']'                            # array_index
         | ident '(' (expr (',' expr)*)? ')'             # function_call
-        | op=(SUB|NOT|PLUS) expr                        # symbol
+        | op=(NOT|PLUS|SUB) expr                        # unary
         | expr op=(MUL|DIV|MOD) expr                    # arithmetic
         | expr op=(PLUS|SUB) expr                       # arithmetic
-        | expr op=(EQ|NEQ|GT|GTE|LT|LTE) expr           # relational
-        | expr op=(AND|OR) expr                         # logical
-        | expr OR expr                                  # logical
-        | (INTVAL|FLOATVAL|CHARVAL|BOOLVAL)             # value
+        | expr op=(EQ|NEQ|GT|GTE|LTE|LT) expr           # relational
+        | expr op=AND expr                              # logical
+        | expr op=OR expr                               # logical
+        | (INTVAL|FLOATVAL|BOOLVAL|CHARVAL)             # value
         | ident                                         # exprIdent
         ;
 
@@ -121,14 +121,15 @@ ident   : ID
 //////////////////////////////////////////////////
 
 ASSIGN    : '=' ;
-//EQUAL     : '==' ;            //OLD maybe problems...
 
+// ---  Arithmetic  ---
 PLUS      : '+' ;
 SUB       : '-';
 MUL       : '*';
 DIV       : '/';
 MOD       : '%';
 
+// ---  Relational  ---
 EQ        : '==' ;
 NEQ       : '!=' ;
 GT        : '>' ;
@@ -136,23 +137,20 @@ GTE       : '>=' ;
 LT        : '<' ;
 LTE       : '<=' ;
 
+// ---  Logical  ---
 AND       : 'and';
 OR        : 'or';
 NOT       : 'not';
 
-
-LPAREN      : '(';
-RPAREN      : ')';
-
+// ---  Types  ---     
 VAR       : 'var';
-
 INT       : 'int';
-BOOL      : 'bool';
 FLOAT     : 'float';
+BOOL      : 'bool';
 CHAR      : 'char';
-
 ARRAY     : 'array' ;
 
+// ---  Constructs  ---
 IF        : 'if' ;
 THEN      : 'then' ;
 ELSE      : 'else' ;
@@ -168,7 +166,7 @@ RETURN    : 'return' ;
 READ      : 'read' ;
 WRITE     : 'write' ;
 
-
+// --- Values  ---
 INTVAL    : ('0'..'9')+ ;
 FLOATVAL  : ('0'..'9')+ '.' ('0'..'9')+ ;
 CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'\'')) '\'' ;
@@ -190,3 +188,7 @@ COMMENT   : '//' ~('\n'|'\r')* '\r'? '\n' -> skip ;
 WS        : (' '|'\t'|'\r'|'\n')+ -> skip ;
 // Alternative description
 // WS        : [ \t\r\n]+ -> skip ;
+
+
+/* LPAREN      : '(';
+RPAREN      : ')'; */
