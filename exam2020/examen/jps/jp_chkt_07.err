@@ -1,0 +1,4 @@
+Line 9:2 error: Incorrect number of 'for-range' expressions.
+Line 9:21 error: Identifier 'z' is undeclared.
+Line 23:3 error: Assignment with incompatible types.
+Line 26:2 error: Return with incompatible type.

@@ -1,0 +1,6 @@
+Line 6:6 error: Integer type required in 'for' control variable.
+Line 7:11 error: Assignment with incompatible types.
+Line 7:18 error: Parameter #2 with incompatible types in call to 'f'.
+Line 15:6 error: Integer type required in 'for' control variable.
+Line 18:13 error: Return with incompatible type.
+Line 18:23 error: Operator '-' with incompatible types.

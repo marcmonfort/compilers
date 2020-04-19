@@ -1,0 +1,5 @@
+Line 5:6 error: Incorrect number of arguments in funtion 'max'.
+Line 6:4 error: Assignment with incompatible types.
+Line 7:6 error: Incorrect number of arguments in funtion 'max'.
+Line 9:6 error: Incorrect number of arguments in funtion 'max'.
+Line 9:17 error: Identifier 'x' is undeclared.

@@ -1,0 +1,9 @@
+Line 6:6 error: Integer type required in 'for' control variable.
+Line 6:21 error: Integer types required in 'for-range' expressions.
+Line 7:11 error: Assignment with incompatible types.
+Line 7:15 error: Identifier 'c' is undeclared.
+Line 15:6 error: Integer type required in 'for' control variable.
+Line 15:20 error: Integer types required in 'for-range' expressions.
+Line 16:9 error: Identifier 'q' is undeclared.
+Line 18:13 error: Return with incompatible type.
+Line 18:23 error: Operator '-' with incompatible types.

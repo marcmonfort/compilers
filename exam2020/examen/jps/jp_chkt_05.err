@@ -1,0 +1,6 @@
+Line 7:6 error: Incorrect number of arguments in funtion 'max'.
+Line 10:4 error: Assignment with incompatible types.
+Line 12:4 error: Assignment with incompatible types.
+Line 14:4 error: Assignment with incompatible types.
+Line 15:6 error: Incompatible argument types in funtion 'max'.
+Line 16:6 error: Incompatible argument types in funtion 'max'.

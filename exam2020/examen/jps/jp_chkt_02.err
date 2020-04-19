@@ -1,0 +1,5 @@
+Line 5:30 error: Operator '/' with incompatible types.
+Line 7:7 error: Assignment with incompatible types.
+Line 7:11 error: Identifier 'x' is undeclared.
+Line 10:4 error: Assignment with incompatible types.
+Line 11:2 error: Instruction 'if' requires a boolean condition.
