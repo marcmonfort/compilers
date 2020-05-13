@@ -291,19 +291,19 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
 
   if (ctx->expr()) {  //es un array
     visit(ctx->expr());
-    TypesMgr::TypeId index = getTypeDecor(ctx->expr());
+    TypesMgr::TypeId tIndex = getTypeDecor(ctx->expr());
     bool array_okay = not Types.isErrorTy(tID);
 
     if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
       Errors.nonArrayInArrayAccess(ctx);
       tID = Types.createErrorTy(); //no acumula mas errores
       array_okay = false;
-      //b = false;  //NOSE
+      b = false;  //no sabemos que es...
     }
-    if ((not Types.isErrorTy(index)) and (not Types.isIntegerTy(index))){  //index no entero
+    if ((not Types.isErrorTy(tIndex)) and (not Types.isIntegerTy(tIndex))){  //index no entero
       Errors.nonIntegerIndexInArrayAccess(ctx->expr());
-      array_okay = false;
-      //poner tID como errorType ???
+      //array_okay = false;
+      //poner tID como errorType ??? NO, porque ya podemos inferir!
     }
     if (array_okay) {
       tID = Types.getArrayElemType(tID);
@@ -345,32 +345,21 @@ antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *
   visit(ctx->ident());
   visit(ctx->expr());
   TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
-  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
-
-  bool array_okay = not Types.isErrorTy(tID);
-
-  if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
-    Errors.nonArrayInArrayAccess(ctx);
-    tID = Types.createErrorTy();    
-    array_okay = false;
-    //b = False;
+  TypesMgr::TypeId tIndex = getTypeDecor(ctx->expr());
+  TypesMgr::TypeId tElem = Types.createErrorTy();
+  
+  if (not Types.isErrorTy(tID) ){
+    if (not Types.isArrayTy(tID))
+      Errors.nonArrayInArrayAccess(ctx);
+    else tElem = Types.getArrayElemType(tID); 
   }
-  if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
+
+  if (not Types.isErrorTy(tIndex) and not Types.isIntegerTy(tIndex)){  //index no entero
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
-    array_okay = false;
-    tID = Types.createErrorTy();  //hace falta
-    //poner tID como errorType ???
-  }
-  if (array_okay) {
-    tID = Types.getArrayElemType(tID);
-    //b = true;
   }
 
-  putTypeDecor(ctx, tID);
-
-  bool b = getIsLValueDecor(ctx->ident()); // Nose
-  putIsLValueDecor(ctx, b);
-  //putIsLValueDecor(ctx, false); //corecto???
+  putTypeDecor(ctx, tElem);
+  putIsLValueDecor(ctx, true);  //se podria considerar lvalue, pero no creo nunca tenga ese uso...
 
   DEBUG_EXIT();
   return 0;
@@ -405,8 +394,8 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
       for (size_t i = 0; i < lParamsTy.size(); ++i) {
         visit(ctx->expr(i));  //Aqui si
         TypesMgr::TypeId tPar = getTypeDecor(ctx->expr(i));
-        //std::cout << Types.to_string(getTypeDecor(ctx->expr(i))) << std::endl;
-        //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
+        std::cout << Types.to_string(getTypeDecor(ctx->expr(i))) << std::endl;
+        std::cout << Types.to_string(lParamsTy[i]) << std::endl;
 
         if (not Types.equalTypes(lParamsTy[i], tPar)) {
           if (not Types.isErrorTy(tPar) and not (Types.isIntegerTy(tPar) and Types.isFloatTy(lParamsTy[i])))
