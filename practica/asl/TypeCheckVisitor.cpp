@@ -291,19 +291,19 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx)
 
   if (ctx->expr()) {  //es un array
     visit(ctx->expr());
-    TypesMgr::TypeId index = getTypeDecor(ctx->expr());
+    TypesMgr::TypeId tIndex = getTypeDecor(ctx->expr());
     bool array_okay = not Types.isErrorTy(tID);
 
     if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
       Errors.nonArrayInArrayAccess(ctx);
       tID = Types.createErrorTy(); //no acumula mas errores
       array_okay = false;
-      //b = false;  //NOSE
+      b = false;  //no sabemos que es...
     }
-    if ((not Types.isErrorTy(index)) and (not Types.isIntegerTy(index))){  //index no entero
+    if ((not Types.isErrorTy(tIndex)) and (not Types.isIntegerTy(tIndex))){  //index no entero
       Errors.nonIntegerIndexInArrayAccess(ctx->expr());
-      array_okay = false;
-      //poner tID como errorType ???
+      //array_okay = false; // SE PUEDE INFERIR EL TIPO DEL ARRAY
+      //poner tID como errorType ??? NO, porque ya podemos inferir!
     }
     if (array_okay) {
       tID = Types.getArrayElemType(tID);
@@ -345,36 +345,26 @@ antlrcpp::Any TypeCheckVisitor::visitArray_index(AslParser::Array_indexContext *
   visit(ctx->ident());
   visit(ctx->expr());
   TypesMgr::TypeId tID = getTypeDecor(ctx->ident());
-  TypesMgr::TypeId t = getTypeDecor(ctx->expr());
-
-  bool array_okay = not Types.isErrorTy(tID);
-
-  if ((not Types.isErrorTy(tID)) and (not Types.isArrayTy(tID))){  //ID no array
-    Errors.nonArrayInArrayAccess(ctx);
-    tID = Types.createErrorTy();    
-    array_okay = false;
-    //b = False;
+  TypesMgr::TypeId tIndex = getTypeDecor(ctx->expr());
+  TypesMgr::TypeId tElem = Types.createErrorTy();
+  
+  if (not Types.isErrorTy(tID) ){
+    if (not Types.isArrayTy(tID))
+      Errors.nonArrayInArrayAccess(ctx);
+    else tElem = Types.getArrayElemType(tID); 
   }
-  if ((not Types.isErrorTy(t)) and (not Types.isIntegerTy(t))){  //index no entero
+
+  if (not Types.isErrorTy(tIndex) and not Types.isIntegerTy(tIndex)){  //index no entero
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
-    array_okay = false;
-    tID = Types.createErrorTy();  //hace falta
-    //poner tID como errorType ???
-  }
-  if (array_okay) {
-    tID = Types.getArrayElemType(tID);
-    //b = true;
   }
 
-  putTypeDecor(ctx, tID);
-
-  bool b = getIsLValueDecor(ctx->ident()); // Nose
-  putIsLValueDecor(ctx, b);
-  //putIsLValueDecor(ctx, false); //corecto???
+  putTypeDecor(ctx, tElem);
+  putIsLValueDecor(ctx, true);  //se podria considerar lvalue, pero no creo nunca tenga ese uso...
 
   DEBUG_EXIT();
   return 0;
 }
+
 
 antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callContext *ctx) {
   DEBUG_ENTER();
@@ -409,7 +399,7 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
         //std::cout << Types.to_string(lParamsTy[i]) << std::endl;
 
         if (not Types.equalTypes(lParamsTy[i], tPar)) {
-          if (not (Types.isIntegerTy(tPar) and Types.isFloatTy(lParamsTy[i])))
+          if (not Types.isErrorTy(tPar) and not (Types.isIntegerTy(tPar) and Types.isFloatTy(lParamsTy[i])))
             Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
         }
       }
@@ -421,6 +411,7 @@ antlrcpp::Any TypeCheckVisitor::visitFunction_call(AslParser::Function_callConte
   DEBUG_EXIT();
   return 0;
 }
+
 
 antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx) {    //hace falta???
   DEBUG_ENTER();
@@ -486,16 +477,11 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
           Errors.incompatibleOperator(ctx->op);
         }
       }
-
       if (Types.isFloatTy(elem1) and Types.isFloatTy(elem2)) {
         t = Types.createFloatTy();
       }
-      //t = 
-          // no I
-
-
     }
-    ////  FI 
+    ////  FI - EXAM 2019
     else if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or 
             ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
       Errors.incompatibleOperator(ctx->op);
@@ -508,6 +494,7 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   DEBUG_EXIT();
   return 0;
 }
+
 
 antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {
   DEBUG_ENTER();
@@ -535,7 +522,6 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
 }
 
 
-
 antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {
   DEBUG_ENTER();
 
@@ -555,6 +541,7 @@ antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx) {
   DEBUG_EXIT();
   return 0;
 }
+
 
 antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
@@ -612,6 +599,97 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
     else
       putIsLValueDecor(ctx, true);
   }
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+////  ////  ////  ////
+//// EXAM 2020    ////
+////  ////  ////  ////
+
+antlrcpp::Any TypeCheckVisitor::visitMax(AslParser::MaxContext *ctx) {
+  DEBUG_ENTER();
+
+  TypesMgr::TypeId tFinal = Types.createErrorTy();
+  bool isFloat = false;
+  bool isChar = false;
+  bool isInt = false;
+  bool isError = false;
+  for (size_t i = 0; i < (ctx->expr()).size(); ++i) {  //visitamo elementos
+    visit(ctx->expr(i));
+    TypesMgr::TypeId elem = getTypeDecor(ctx->expr(i));
+
+    if ((not Types.isErrorTy(elem) and not Types.isNumericTy(elem)) and 
+    not Types.isCharacterTy(elem)){
+      //Errors.incompatibleMaxArguments(ctx);
+    }
+    if (Types.isCharacterTy(elem)) {
+      if (isFloat or isInt) {
+        //Errors.incompatibleMaxArguments(ctx);
+        isError = true;
+      }
+      else isChar = true;
+    }
+    if (Types.isNumericTy(elem)) {
+      if (isChar){
+        //Errors.incompatibleMaxArguments(ctx);
+        isError = true;
+      }
+      else if (Types.isIntegerTy(elem)) isInt = true;
+      else isFloat = true; //!!!
+    }
+  }
+
+  if (isChar) tFinal = Types.createCharacterTy();
+  else if (isInt) tFinal = Types.createIntegerTy();
+  if (isFloat) tFinal = Types.createFloatTy();
+
+  if (isError) tFinal = Types.createErrorTy();
+  
+  if ((ctx->expr()).size() < 2) {
+    //Errors.numberOfMaxArguments(ctx);
+  }
+
+  putTypeDecor(ctx, tFinal);
+  putIsLValueDecor(ctx, false);
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+antlrcpp::Any TypeCheckVisitor::visitForRange(AslParser::ForRangeContext *ctx) {
+  DEBUG_ENTER();
+
+  if ((ctx->expr()).size() < 2 or (ctx->expr()).size() > 4) {
+    //Errors.numberOfRangeExpressions(ctx);
+  }
+
+  visit(ctx->expr(0));
+  TypesMgr::TypeId ct = getTypeDecor(ctx->expr(0));
+  if (not Types.isErrorTy(ct) and not Types.isIntegerTy(ct)) {
+    //Errors.forRequireIntegerVar(ctx->expr(0));
+  }
+  
+
+  for (size_t i = 1; i < (ctx->expr()).size(); ++i) {  //visitamo elementos
+    visit(ctx->expr(i));
+    TypesMgr::TypeId tp = getTypeDecor(ctx->expr(i));
+    if (not Types.isErrorTy(tp) and not Types.isIntegerTy(tp)) {
+      //Errors.forRequireIntegerExpr(ctx->expr(i));
+    }
+  }
+  
+  visit(ctx->statements());
+
+  
+
+  TypesMgr::TypeId t = getTypeDecor(ctx->expr(0));
+
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+
   DEBUG_EXIT();
   return 0;
 }

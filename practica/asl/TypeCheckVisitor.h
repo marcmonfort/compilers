@@ -90,6 +90,10 @@ public:
   antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
   antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx);
 
+  // EXAM 2020
+  antlrcpp::Any visitMax(AslParser::MaxContext *ctx);
+  antlrcpp::Any visitForRange(AslParser::ForRangeContext *ctx);
+
   // EXAM 2019
   antlrcpp::Any visitArrayMax(AslParser::ArrayMaxContext *ctx);
 

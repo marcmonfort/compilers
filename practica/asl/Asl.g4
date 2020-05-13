@@ -80,6 +80,8 @@ statement
           // Assignment
         : left_expr ASSIGN expr ';'                                     # assignStmt
           // if-then-else statement (else is optional)
+        | FOR expr IN RANGE '(' (expr (',' expr)*)? ')' 'do' statements ENDFOR          # forRange
+        
         | IF expr THEN statements (ELSE statements)? ENDIF              # ifStmt
 
         | WHILE expr 'do' statements  ENDWHILE                          # whileStmt
@@ -103,6 +105,7 @@ left_expr
 // Grammar for expressions with boolean, relational and aritmetic operators
 expr    : '(' expr ')'                                  # parenthesis
         | expr op=A_MAX                                 # arrayMax //exam 2019
+        | op=MAX '('(expr (',' expr)*)? ')'             # max //exam2020
         | ident '[' expr ']'                            # array_index
         | ident '(' (expr (',' expr)*)? ')'             # function_call
         | op=(NOT|PLUS|SUB) expr                        # unary
@@ -168,8 +171,16 @@ RETURN    : 'return' ;
 READ      : 'read' ;
 WRITE     : 'write' ;
 
-// --- Exam 2019  ---
 
+// --- Exam 2020  ---
+MAX       : 'max';
+
+FOR       : 'for';
+IN        : 'in';
+RANGE     : 'range';
+ENDFOR    : 'endfor';
+
+// --- Exam 2019  ---
 A_MAX       : '.max';
 
 // --- Values  ---
