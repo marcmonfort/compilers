@@ -82,6 +82,16 @@ public:
   antlrcpp::Any visitValue(AslParser::ValueContext *ctx);
   antlrcpp::Any visitIdent(AslParser::IdentContext *ctx);
 
+  //NEW
+  antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
+  antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx);
+  antlrcpp::Any visitLogical(AslParser::LogicalContext *ctx);
+  antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *ctx);
+  antlrcpp::Any visitReturnStmt(AslParser::ReturnStmtContext *ctx);
+  antlrcpp::Any visitParameters(AslParser::ParametersContext *ctx);
+  antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
+  
+
 private:
 
   // Attributes
