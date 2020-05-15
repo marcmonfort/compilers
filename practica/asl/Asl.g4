@@ -172,8 +172,9 @@ READ      : 'read' ;
 WRITE     : 'write' ;
 
 
+//vigilar que las variables no tengan el mismo nombre
 // --- Exam 2020  ---
-MAX       : 'max';
+MAX       : 'max_';
 
 FOR       : 'for';
 IN        : 'in';

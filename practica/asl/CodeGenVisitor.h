@@ -90,6 +90,7 @@ public:
   antlrcpp::Any visitReturnStmt(AslParser::ReturnStmtContext *ctx);
   antlrcpp::Any visitParameters(AslParser::ParametersContext *ctx);
   antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
+  antlrcpp::Any visitArray_index(AslParser::Array_indexContext *ctx);
   
 
 private:
