@@ -66,7 +66,7 @@ COMMENT
 
 echo ""
 echo "BEGIN examples-full/execution"
-for f in ../examples/jp_genc_0[1-4]*.asl; do
+for f in ../examples/jp_genc_*.asl; do
     echo $(basename "$f")
     ./asl "$f" > tmp.t
     ../tvm/tvm tmp.t < "${f/asl/in}" > tmp.out
