@@ -175,7 +175,7 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   }
   else if (not Types.isErrorTy(tID)){
 
-    /*if (Types.isVoidFunction(tID)){   //it can be void!
+    /*if (Types.isVoidFunction(tID)){   //it can be void.. (we allow it)
       Errors.isNotFunction(ctx->ident());
       t = Types.createErrorTy();
     }*/
