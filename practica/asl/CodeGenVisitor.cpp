@@ -721,6 +721,96 @@ antlrcpp::Any CodeGenVisitor::visitIdent(AslParser::IdentContext *ctx) {
 }
 
 
+////  ////  ////  ////
+//// EXAM 2019    ////
+////  ////  ////  ////
+
+antlrcpp::Any CodeGenVisitor::visitArrayMax(AslParser::ArrayMaxContext *ctx) {
+  DEBUG_ENTER();
+  CodeAttribs     && codAtsE1 = visit(ctx->expr());
+  std::string           addr1 = codAtsE1.addr;
+  std::string           offs1 = codAtsE1.offs;
+  instructionList &     code1 = codAtsE1.code;
+  TypesMgr::TypeId tid1 = getTypeDecor(ctx->expr());
+
+  instructionList & code = code1;
+
+  if (not Symbols.isLocalVarClass(addr1)) { 
+    std::string tempL1 = "%"+codeCounters.newTEMP();
+    code = code || instruction::LOAD(tempL1, addr1);
+    addr1 = tempL1;
+  }
+
+  std::string labelWhile = "while"+codeCounters.newLabelWHILE();
+  std::string labelEndWhile = "end"+labelWhile;
+  std::string labelElse = "else"+codeCounters.newLabelIF();
+
+  std::string numElems = std::to_string(Types.getArraySize(tid1)-1);
+  std::string tempOffs = "%"+codeCounters.newTEMP();
+  std::string tempElem = "%"+codeCounters.newTEMP();
+  std::string tempCond = "%"+codeCounters.newTEMP();
+  std::string justZero = "%"+codeCounters.newTEMP();
+  std::string justOne  = "%"+codeCounters.newTEMP();
+
+  std::string maxElem  = "%"+codeCounters.newTEMP();
+
+
+  if (Types.isFloatTy(Types.getArrayElemType(tid1))){
+    code = code || 
+                  instruction::ILOAD(tempOffs, numElems) ||
+                  //instruction::WRITEI(tempOffs) ||
+                  instruction::ILOAD(justOne,  "1") ||
+                  instruction::ILOAD(justZero, "0") ||
+
+                  instruction::LOADX(tempElem, addr1, justZero) ||
+                  instruction::LOAD(maxElem, tempElem) ||
+                  //instruction::FLOAD(maxElem, "1.0") ||
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LE(tempCond, justZero, tempOffs) || // 
+                  instruction::FJUMP(tempCond, labelEndWhile) ||    // si ya hemos reccorrido todo el array
+
+                  instruction::LOADX(tempElem, addr1, tempOffs) ||
+                  instruction::FLT(tempCond, maxElem, tempElem) ||
+                  instruction::FJUMP(tempCond, labelElse) ||
+                  instruction::FLOAD(maxElem, tempElem) || // same as LOAD
+                  instruction::LABEL(labelElse) ||
+                  instruction::SUB(tempOffs, tempOffs, justOne) ||
+                  
+                  instruction::UJUMP(labelWhile) ||
+                  instruction::LABEL(labelEndWhile);
+  }
+  else {
+    code = code || 
+                  instruction::ILOAD(tempOffs, numElems) ||
+                  //instruction::WRITEI(tempOffs) ||
+                  instruction::ILOAD(justOne,  "1") ||
+                  instruction::ILOAD(justZero, "0") ||
+
+                  instruction::LOADX(tempElem, addr1, justZero) ||
+                  instruction::LOAD(maxElem, tempElem) ||
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LE(tempCond, justZero, tempOffs) || // 
+                  instruction::FJUMP(tempCond, labelEndWhile) ||    // si ya hemos reccorrido todo el array
+
+                  instruction::LOADX(tempElem, addr1, tempOffs) ||
+                  instruction::LT(tempCond, maxElem, tempElem) ||
+                  instruction::FJUMP(tempCond, labelElse) ||
+                  instruction::LOAD(maxElem, tempElem) ||
+                  instruction::LABEL(labelElse) ||
+                  instruction::SUB(tempOffs, tempOffs, justOne) ||
+                  
+                  instruction::UJUMP(labelWhile) ||
+                  instruction::LABEL(labelEndWhile);
+  }
+
+  CodeAttribs codAts(maxElem, "", code);
+  DEBUG_EXIT();
+  return codAts;
+
+}
+
 
 
 ////  ////  ////  ////  ////  
