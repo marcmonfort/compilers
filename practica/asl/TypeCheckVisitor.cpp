@@ -683,8 +683,6 @@ antlrcpp::Any TypeCheckVisitor::visitForRange(AslParser::ForRangeContext *ctx) {
   
   visit(ctx->statements());
 
-  
-
   TypesMgr::TypeId t = getTypeDecor(ctx->expr(0));
 
   putTypeDecor(ctx, t);

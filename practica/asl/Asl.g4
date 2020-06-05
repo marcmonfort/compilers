@@ -80,7 +80,7 @@ statement
           // Assignment
         : left_expr ASSIGN expr ';'                                     # assignStmt
           // if-then-else statement (else is optional)
-        | FOR expr IN RANGE '(' (expr (',' expr)*)? ')' 'do' statements ENDFOR          # forRange
+        | FOR expr IN RANGE '(' (expr (',' expr)*)? ')' 'do' statements ENDFOR  # forRange  //exam 2020
         
         | IF expr THEN statements (ELSE statements)? ENDIF              # ifStmt
 

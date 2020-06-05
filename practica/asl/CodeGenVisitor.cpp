@@ -722,6 +722,172 @@ antlrcpp::Any CodeGenVisitor::visitIdent(AslParser::IdentContext *ctx) {
 
 
 ////  ////  ////  ////
+//// EXAM 2020    ////
+////  ////  ////  ////
+
+antlrcpp::Any CodeGenVisitor::visitMax(AslParser::MaxContext *ctx) {
+  DEBUG_ENTER();
+
+  CodeAttribs     && codAtElem0 = visit(ctx->expr(0));
+  std::string         addrElem0 = codAtElem0.addr;
+  instructionList &   codeElem0 = codAtElem0.code;
+  TypesMgr::TypeId       tElem0 = getTypeDecor(ctx->expr(0));
+
+  instructionList & code = codeElem0;
+
+  bool someFloat = Types.isFloatTy(tElem0);
+  bool alreadyFloat = false;
+
+  std::string maxElem  = "%"+codeCounters.newTEMP();
+  //asignamos a maxElem el primer elemento
+  if (someFloat){
+    code = code || instruction::FLOAD(maxElem, addrElem0);
+    alreadyFloat = true;
+  }
+  else {
+    code = code || instruction::LOAD(maxElem, addrElem0);
+  }
+
+
+  for (size_t i = 1; i < (ctx->expr()).size(); ++i){
+    CodeAttribs     && codAtElem = visit(ctx->expr(i));
+    std::string         addrElem = codAtElem.addr;
+    instructionList &   codeElem = codAtElem.code;
+    TypesMgr::TypeId       tElem = getTypeDecor(ctx->expr(i));
+    
+    code = code || codeElem;
+
+    std::string tempCond  = "%"+codeCounters.newTEMP();
+    std::string labelElse = "else"+codeCounters.newLabelIF();
+
+    if (Types.isFloatTy(tElem) and not alreadyFloat) {
+      someFloat = true;
+      code = code || instruction::FLOAT(maxElem,maxElem);
+      alreadyFloat = true;
+    }
+
+
+    if (someFloat){  //cast to float
+      if (Types.isIntegerTy(tElem)){
+        std::string tempElem = "%"+codeCounters.newTEMP();
+        code = code || instruction::FLOAT(tempElem, addrElem);
+        addrElem = tempElem;
+      }
+
+      code = code || instruction::FLT(tempCond, maxElem, addrElem) ||
+                     instruction::FJUMP(tempCond, labelElse) ||
+                     instruction::FLOAD(maxElem, addrElem) || // same as LOAD
+                     instruction::LABEL(labelElse);
+    }
+    else {
+      code = code || instruction::LT(tempCond, maxElem, addrElem) ||
+                   instruction::FJUMP(tempCond, labelElse) ||
+                   instruction::LOAD(maxElem, addrElem) || // same as LOAD
+                   instruction::LABEL(labelElse);
+    }
+
+  }
+  CodeAttribs codAts(maxElem, "", code);
+  DEBUG_EXIT();
+  return codAts;
+
+}
+
+antlrcpp::Any CodeGenVisitor::visitForRange(AslParser::ForRangeContext *ctx) {
+  DEBUG_ENTER();
+  CodeAttribs     && codAtControl = visit(ctx->expr(0));
+  std::string         addrControl = codAtControl.addr;
+  instructionList &   codeControl = codAtControl.code;
+  //TypesMgr::TypeId       tControl = getTypeDecor(ctx->expr(0));
+
+  instructionList & code = codeControl;
+  instructionList &&   codeStmt = visit(ctx->statements());
+
+  if (ctx->expr().size() == 2) {
+    CodeAttribs     && codAtElem = visit(ctx->expr(1));
+    std::string         addrElem = codAtElem.addr;
+    instructionList &   codeElem = codAtElem.code;
+    //TypesMgr::TypeId       tElem = getTypeDecor(ctx->expr(i));
+
+    code = code || codeElem;
+
+
+    std::string labelWhile = "while"+codeCounters.newLabelWHILE();
+    std::string labelEndWhile = "end"+labelWhile;
+
+    std::string tempCond   = "%"+codeCounters.newTEMP();
+    std::string tempIndex  = "%"+codeCounters.newTEMP();
+    std::string justOne    = "%"+codeCounters.newTEMP();
+
+
+    code = code || instruction::ILOAD(tempIndex, "0") ||
+                  instruction::ILOAD(justOne, "1") ||
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LT(tempCond, tempIndex, addrElem) ||
+                  instruction::FJUMP(tempCond, labelEndWhile) ||
+
+                  instruction::LOAD(addrControl, tempIndex) ||
+                  codeStmt ||
+                  instruction::ADD(tempIndex, tempIndex, justOne) ||
+                  instruction::UJUMP(labelWhile) ||
+
+                  instruction::LABEL(labelEndWhile);
+
+  }
+  else { // 2 o 3 parametres
+    CodeAttribs     && codAtLow = visit(ctx->expr(1));
+    std::string         addrLow = codAtLow.addr;
+    instructionList &   codeLow = codAtLow.code;
+
+    CodeAttribs     && codAtUp = visit(ctx->expr(2));
+    std::string         addrUp = codAtUp.addr;
+    instructionList &   codeUp = codAtUp.code;
+
+    code = code || codeLow || codeUp;
+
+    std::string labelWhile = "while"+codeCounters.newLabelWHILE();
+    std::string labelEndWhile = "end"+labelWhile;
+
+    std::string tempCond   = "%"+codeCounters.newTEMP();
+    std::string tempIndex  = "%"+codeCounters.newTEMP();
+    //std::string justOne    = "%"+codeCounters.newTEMP();
+    std::string tempIncrem = "%"+codeCounters.newTEMP();
+
+
+    if (ctx->expr(3)) {
+      CodeAttribs     && codAtIncrem = visit(ctx->expr(3));
+      std::string         addrIncrem = codAtIncrem.addr;
+      instructionList &   codeIncrem = codAtIncrem.code;
+
+      code = code || codeIncrem || 
+                     instruction::LOAD(tempIncrem, addrIncrem);
+    }
+    else {
+      code = code || instruction::ILOAD(tempIncrem, "1");
+    }
+
+
+    code = code || instruction::ILOAD(tempIndex, addrLow) ||
+                  //instruction::ILOAD(tempIncrem, "1") || //same as LOAD?
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LT(tempCond, tempIndex, addrUp) ||
+                  instruction::FJUMP(tempCond, labelEndWhile) ||
+
+                  instruction::LOAD(addrControl, tempIndex) ||
+                  codeStmt ||
+                  instruction::ADD(tempIndex, tempIndex, tempIncrem) ||
+                  instruction::UJUMP(labelWhile) ||
+
+                  instruction::LABEL(labelEndWhile);
+  }
+  DEBUG_EXIT();
+  return code;
+}
+
+
+////  ////  ////  ////
 //// EXAM 2019    ////
 ////  ////  ////  ////
 

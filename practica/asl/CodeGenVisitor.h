@@ -92,6 +92,12 @@ public:
   antlrcpp::Any visitFunction_call(AslParser::Function_callContext *ctx);
   antlrcpp::Any visitArray_index(AslParser::Array_indexContext *ctx);
 
+
+
+  // EXAM 2020 - primer
+  antlrcpp::Any visitMax(AslParser::MaxContext *ctx);
+  antlrcpp::Any visitForRange(AslParser::ForRangeContext *ctx);
+
   // EXAM 2019
   antlrcpp::Any visitArrayMax(AslParser::ArrayMaxContext *ctx);
   
