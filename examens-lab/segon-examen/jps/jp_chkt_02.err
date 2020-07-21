@@ -1,0 +1,7 @@
+Line 6:30 error: Operator '/' with incompatible types.
+Line 8:7 error: Assignment with incompatible types.
+Line 9:13 error: Operator 'sum' with incompatible types.
+Line 12:6 error: Operator 'sum' with incompatible types.
+Line 13:17 error: Identifier 'k' is undeclared.
+Line 14:4 error: Assignment with incompatible types.
+Line 14:6 error: Operator 'sum' with incompatible types.

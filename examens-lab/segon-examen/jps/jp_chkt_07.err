@@ -1,0 +1,7 @@
+Line 19:13 error: Operator 'filter' with incompatible types.
+Line 21:2 error: Instruction 'if' requires a boolean condition.
+Line 21:5 error: Operator 'filter' with incompatible types.
+Line 22:14 error: Operator 'filter' with incompatible types.
+Line 25:5 error: Assignment with incompatible types.
+Line 25:7 error: Operator 'filter' with incompatible types.
+Line 25:29 error: Identifier 'r' is undeclared.

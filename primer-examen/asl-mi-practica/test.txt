@@ -1,9 +1,0 @@
-func fun1()
-  var i :int
-  i = 5;
-endfunc
-
-
-func main
-  fun1();
-endfunc

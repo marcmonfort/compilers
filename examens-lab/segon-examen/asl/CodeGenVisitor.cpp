@@ -165,7 +165,7 @@ antlrcpp::Any CodeGenVisitor::visitAssignStmt(AslParser::AssignStmtContext *ctx)
 
   CodeAttribs     && codAtsE2 = visit(ctx->expr());
   std::string           addr2 = codAtsE2.addr;
-  //std::string           offs2 = codAtsE2.offs;
+  std::string           offs2 = codAtsE2.offs;
   instructionList &     code2 = codAtsE2.code;
   TypesMgr::TypeId tid2 = getTypeDecor(ctx->expr());
 
@@ -218,7 +218,7 @@ antlrcpp::Any CodeGenVisitor::visitAssignStmt(AslParser::AssignStmtContext *ctx)
       code = code || instruction::FLOAT(tempFloat, addr2);
       addr2 = tempFloat;
     }
-    if (ctx->left_expr()->expr()){  //array element (a[i])
+    if (ctx->left_expr()->expr()){  //array element
       code = code || instruction::XLOAD(addr1, offs1, addr2);
     }
     else
@@ -431,7 +431,6 @@ antlrcpp::Any CodeGenVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx) {
   instructionList &   code = codeID;
 
   std::string offs = "";
-  // array element (a[offs])
   if (ctx->expr()) {
     CodeAttribs     && codAtIndex = visit(ctx->expr());
     offs                          = codAtIndex.addr;
@@ -721,6 +720,177 @@ antlrcpp::Any CodeGenVisitor::visitIdent(AslParser::IdentContext *ctx) {
   return codAts;
 }
 
+
+////  ////  ////  ////
+//// EXAM 2020 final  ////
+////  ////  ////  ////
+
+antlrcpp::Any CodeGenVisitor::visitFilter(AslParser::FilterContext *ctx) {
+  DEBUG_ENTER();
+
+  CodeAttribs     && codAtArray1 = visit(ctx->expr(0));
+  std::string         addrArray1 = codAtArray1.addr;
+  instructionList &   codeArray1 = codAtArray1.code;
+  CodeAttribs     && codAtArray2 = visit(ctx->expr(1));
+  std::string         addrArray2 = codAtArray2.addr;
+  instructionList &   codeArray2 = codAtArray2.code;
+  CodeAttribs     &&   codAtFunc = visit(ctx->expr(2));
+  std::string           addrFunc = codAtFunc.addr;
+  instructionList &     codeFunc = codAtFunc.code;
+
+  TypesMgr::TypeId tid1 = getTypeDecor(ctx->expr(0));
+
+
+  instructionList && code = codeArray1 || codeArray2 || codeFunc;
+
+
+
+
+  std::string labelWhile = "while"+codeCounters.newLabelWHILE();
+  std::string labelEndWhile = "end"+labelWhile;
+  std::string labelElse = "else"+codeCounters.newLabelIF();
+
+
+  std::string numElems = std::to_string(Types.getArraySize(tid1)-1);
+  std::string tempOffs = "%"+codeCounters.newTEMP();
+  std::string tempElem = "%"+codeCounters.newTEMP();
+  std::string tempCond = "%"+codeCounters.newTEMP();
+  std::string justZero = "%"+codeCounters.newTEMP();
+  std::string justOne  = "%"+codeCounters.newTEMP();
+
+  std::string tempMama  = "%"+codeCounters.newTEMP();
+
+  std::string tempPapa  = "%"+codeCounters.newTEMP();
+
+
+  code = code || 
+                  instruction::ILOAD(justOne,  "1") ||
+                  instruction::ILOAD(justZero, "0") ||
+                  instruction::ILOAD(tempOffs, numElems) ||
+                  instruction::ILOAD(tempPapa, "0") ||
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LE(tempCond, justZero, tempOffs) ||
+                  instruction::FJUMP(tempCond, labelEndWhile) ||
+
+                  instruction::LOADX(tempMama, addrArray1, tempOffs) ||
+                  instruction::PUSH() ||
+                  instruction::PUSH(tempMama) ||
+                  instruction::CALL(addrFunc) ||
+                  instruction::POP() ||
+                  instruction::POP(tempElem) ||
+
+                  instruction::LT(tempCond, justZero, tempElem) ||
+                  instruction::FJUMP(tempCond, labelElse) ||
+                  instruction::ADD(tempPapa, tempPapa, justOne) ||
+                  instruction::LABEL(labelElse) ||
+                  
+                  instruction::XLOAD(addrArray2, tempOffs, tempElem) ||
+                  instruction::SUB(tempOffs, tempOffs, justOne) ||
+
+                  instruction::UJUMP(labelWhile) ||
+                  instruction::LABEL(labelEndWhile);
+
+
+  /* code = code || instruction::ILOAD(tempOffs, numElems) ||
+                  //instruction::WRITEI(tempOffs) ||
+                  instruction::ILOAD(justOne,  "1") ||
+                  instruction::ILOAD(justZero, "0") ||
+
+                  instruction::LABEL(labelWhile) ||
+                  instruction::LE(tempCond, justZero, tempOffs) ||
+                  instruction::FJUMP(tempCond, labelEndWhile) ||
+
+                  instruction::LOADX(tempElem, addr2, tempOffs) ||
+                  instruction::XLOAD(addr1, tempOffs, tempElem) ||
+
+                  instruction::XLOAD(addrArray2, justZero, justOne) ||
+
+                  instruction::SUB(tempOffs, tempOffs, justOne) ||
+                  
+                  instruction::UJUMP(labelWhile) ||
+                  instruction::LABEL(labelEndWhile); */
+
+
+  CodeAttribs codAts(tempPapa, "", code);
+  DEBUG_EXIT();
+  return codAts;
+}
+
+
+
+antlrcpp::Any CodeGenVisitor::visitSum(AslParser::SumContext *ctx) {
+  DEBUG_ENTER();
+
+
+  std::string maxElem  = "%"+codeCounters.newTEMP();
+  instructionList code = instruction::ILOAD(maxElem, "0");
+
+  if (ctx->expr().size() > 0) {
+    CodeAttribs     && codAtElem0 = visit(ctx->expr(0));
+    std::string         addrElem0 = codAtElem0.addr;
+    instructionList &   codeElem0 = codAtElem0.code;
+    TypesMgr::TypeId       tElem0 = getTypeDecor(ctx->expr(0));
+
+    code = code || codeElem0;
+
+    bool someFloat = Types.isFloatTy(tElem0);
+    bool alreadyFloat = false;
+
+    //std::string maxElem  = "%"+codeCounters.newTEMP();
+    //asignamos a maxElem el primer elemento
+    if (someFloat){
+      code = code || instruction::FLOAD(maxElem, addrElem0);
+      alreadyFloat = true;
+    }
+    else {
+      code = code || instruction::LOAD(maxElem, addrElem0);
+    }
+
+
+    for (size_t i = 1; i < (ctx->expr()).size(); ++i){
+      CodeAttribs     && codAtElem = visit(ctx->expr(i));
+      std::string         addrElem = codAtElem.addr;
+      instructionList &   codeElem = codAtElem.code;
+      TypesMgr::TypeId       tElem = getTypeDecor(ctx->expr(i));
+      
+      code = code || codeElem;
+
+      //std::string tempCond  = "%"+codeCounters.newTEMP();
+      //std::string labelElse = "else"+codeCounters.newLabelIF();
+
+      if (Types.isFloatTy(tElem) and not alreadyFloat) {
+        someFloat = true;
+        code = code || instruction::FLOAT(maxElem,maxElem);
+        alreadyFloat = true;
+      }
+
+
+      if (someFloat){  //cast to float
+        if (Types.isIntegerTy(tElem)){
+          std::string tempElem = "%"+codeCounters.newTEMP();
+          code = code || instruction::FLOAT(tempElem, addrElem);
+          addrElem = tempElem;
+        }
+
+        code = code || 
+                      //instruction::FLT(tempCond, maxElem, addrElem) ||
+                      //instruction::FJUMP(tempCond, labelElse) ||
+                      instruction::FADD(maxElem, maxElem, addrElem); // same as LOAD
+                      //instruction::LABEL(labelElse);
+      }
+      else {
+        code = code || instruction::ADD(maxElem, maxElem, addrElem);
+
+      }
+
+    }
+  }
+  CodeAttribs codAts(maxElem, "", code);
+  DEBUG_EXIT();
+  return codAts;
+
+}
 
 ////  ////  ////  ////
 //// EXAM 2020    ////
